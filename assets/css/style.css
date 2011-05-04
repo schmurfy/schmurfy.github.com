@@ -1,0 +1,261 @@
+/* line 17, /Users/schmurfy/.rvm/gems/ruby-1.9.2-p180/gems/compass-0.11.1/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+
+/* line 20, /Users/schmurfy/.rvm/gems/ruby-1.9.2-p180/gems/compass-0.11.1/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+body {
+  line-height: 1;
+}
+
+/* line 22, /Users/schmurfy/.rvm/gems/ruby-1.9.2-p180/gems/compass-0.11.1/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+ol, ul {
+  list-style: none;
+}
+
+/* line 24, /Users/schmurfy/.rvm/gems/ruby-1.9.2-p180/gems/compass-0.11.1/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* line 26, /Users/schmurfy/.rvm/gems/ruby-1.9.2-p180/gems/compass-0.11.1/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+caption, th, td {
+  text-align: left;
+  font-weight: normal;
+  vertical-align: middle;
+}
+
+/* line 28, /Users/schmurfy/.rvm/gems/ruby-1.9.2-p180/gems/compass-0.11.1/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+q, blockquote {
+  quotes: none;
+}
+/* line 101, /Users/schmurfy/.rvm/gems/ruby-1.9.2-p180/gems/compass-0.11.1/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+q:before, q:after, blockquote:before, blockquote:after {
+  content: "";
+  content: none;
+}
+
+/* line 30, /Users/schmurfy/.rvm/gems/ruby-1.9.2-p180/gems/compass-0.11.1/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+a img {
+  border: none;
+}
+
+/* line 115, /Users/schmurfy/.rvm/gems/ruby-1.9.2-p180/gems/compass-0.11.1/frameworks/compass/stylesheets/compass/reset/_utilities.scss */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+  display: block;
+}
+
+/* line 57, content/assets/css/style.scss */
+* {
+  font-family: "Georgia, Times New Roman, serif";
+  color: #404040;
+}
+
+/* line 62, content/assets/css/style.scss */
+h1, h2, h3, h4 {
+  font-family: "Droid Serif";
+  color: #8B2C1D;
+}
+
+/* line 67, content/assets/css/style.scss */
+h1 {
+  font-size: 2.3em;
+  color: #5D1D14;
+}
+
+/* line 72, content/assets/css/style.scss */
+h2 {
+  font-size: 1.5em;
+  font-weight: bold;
+}
+
+/* line 77, content/assets/css/style.scss */
+h3 {
+  /*  font-size: 16px;*/
+  font-size: 1.3em;
+  margin-left: 20px;
+}
+
+/* line 83, content/assets/css/style.scss */
+UL {
+  margin-left: 25px;
+}
+/* line 85, content/assets/css/style.scss */
+UL LI {
+  list-style-position: inside;
+  list-style: square;
+  padding: 3px 0;
+}
+
+/* line 92, content/assets/css/style.scss */
+body {
+  font-size: 100%;
+  background-color: #636769;
+  min-width: 800px;
+}
+/* line 97, content/assets/css/style.scss */
+body #page {
+  width: 1000px;
+  border: 7px solid #4a4d4f;
+  margin: 40px auto 20px auto;
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+  -o-border-radius: 7px;
+  -ms-border-radius: 7px;
+  -khtml-border-radius: 7px;
+  border-radius: 7px;
+}
+/* line 103, content/assets/css/style.scss */
+body #page #inner-page {
+  background-color: white;
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+  -o-border-radius: 7px;
+  -ms-border-radius: 7px;
+  -khtml-border-radius: 7px;
+  border-radius: 7px;
+  width: 1000px;
+  margin: 0 auto;
+  overflow: hidden;
+  *zoom: 1;
+  background: url("/assets/images/bg.jpg") repeat scroll 0 0 #e8e8e8;
+  position: relative;
+}
+/* line 110, content/assets/css/style.scss */
+body #page #inner-page .fork_me {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+/* line 116, content/assets/css/style.scss */
+body #page #inner-page #header {
+  display: inline;
+  float: left;
+  margin-right: 0;
+  width: 1000px;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  -ms-box-sizing: border-box;
+  box-sizing: border-box;
+  padding: 10px 30px;
+  text-indent: 50px;
+}
+/* line 147, /Users/schmurfy/.rvm/gems/ruby-1.9.2-p180/gems/compass-0.11.1/frameworks/blueprint/stylesheets/blueprint/_grid.scss */
+* html body #page #inner-page #header {
+  overflow-x: hidden;
+}
+/* line 122, content/assets/css/style.scss */
+body #page #inner-page #header h1 {
+  /*          font-family: 'Aclonica';*/
+  /*          font-family: 'Allerta Stencil';*/
+  /*          font-family: 'Maiden Orange';*/
+  font-family: 'Expletus Sans';
+  font-size: 4em;
+  height: 75px;
+  width: 100%;
+  padding-top: 10px;
+  text-align: center;
+}
+/* line 133, content/assets/css/style.scss */
+body #page #inner-page #header h1 a {
+  text-shadow: white 2px 1px 0;
+  text-decoration: none;
+}
+/* line 141, content/assets/css/style.scss */
+body #page #inner-page #content {
+  padding: 10px 20px;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  -ms-box-sizing: border-box;
+  box-sizing: border-box;
+  display: inline;
+  float: left;
+  margin-right: 0;
+  width: 760px;
+}
+/* line 147, /Users/schmurfy/.rvm/gems/ruby-1.9.2-p180/gems/compass-0.11.1/frameworks/blueprint/stylesheets/blueprint/_grid.scss */
+* html body #page #inner-page #content {
+  overflow-x: hidden;
+}
+/* line 146, content/assets/css/style.scss */
+body #page #inner-page #content h1, body #page #inner-page #content h2, body #page #inner-page #content h3 {
+  padding: 20px 0 5px 0;
+}
+/* line 150, content/assets/css/style.scss */
+body #page #inner-page #content .highlight {
+  margin: 10px;
+  font-family: monospace;
+  border: 1px solid #AAA;
+  padding-top: 8px;
+  -moz-box-shadow: grey, 4px, 4px, 10px;
+  -webkit-box-shadow: grey, 4px, 4px, 10px;
+  -o-box-shadow: grey, 4px, 4px, 10px;
+  box-shadow: grey, 4px, 4px, 10px;
+}
+/* line 159, content/assets/css/style.scss */
+body #page #inner-page #content p {
+  margin: 10px 2px;
+}
+/* line 162, content/assets/css/style.scss */
+body #page #inner-page #content .article h1.title {
+  display: inline;
+}
+/* line 166, content/assets/css/style.scss */
+body #page #inner-page #content .article .article_date {
+  display: inline;
+  color: #777;
+  margin-left: 4px;
+}
+/* line 172, content/assets/css/style.scss */
+body #page #inner-page #content .article .body {
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  -ms-box-sizing: border-box;
+  box-sizing: border-box;
+  padding: 34px 20px;
+}
+/* line 181, content/assets/css/style.scss */
+body #page #inner-page #sidebox {
+  display: inline;
+  float: left;
+  margin-right: 0;
+  width: 240px;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  -ms-box-sizing: border-box;
+  box-sizing: border-box;
+  color: #777;
+  padding-bottom: 20px;
+  font-size: 0.9em;
+}
+/* line 147, /Users/schmurfy/.rvm/gems/ruby-1.9.2-p180/gems/compass-0.11.1/frameworks/blueprint/stylesheets/blueprint/_grid.scss */
+* html body #page #inner-page #sidebox {
+  overflow-x: hidden;
+}
+/* line 188, content/assets/css/style.scss */
+body #page #inner-page #sidebox h2 {
+  margin: 20px 0 10px;
+}
+/* line 192, content/assets/css/style.scss */
+body #page #inner-page #sidebox UL {
+  margin-left: 20px;
+}
