@@ -1,14 +1,21 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Simple yet secure file server</title>
-<meta content=", sinatra, ruby, nginx, redis" name="keywords">
-<link href="/assets/css/pygment.css" media="screen" rel="stylesheet" type="text/css">
-<link href="/assets/css/style.css" media="screen" rel="stylesheet" type="text/css">
-<script src="/assets/js/jquery-1.6.min.js" type="text/javascript"></script><script src="/assets/js/humane.js" type="text/javascript"></script><script src="/assets/js/app.js" type="text/javascript"></script><!-- %link{:rel => "alternate" :type => "application/atom+xml", :title => "schmurfy.github.com", :href => "http://feeds.feedburner.com/schmurfy" } --><!-- %link{:rel => 'stylesheet', :href => 'http://fonts.googleapis.com/css?family=Aclonica', :type => 'text/css'} --><!-- %link{:rel => 'stylesheet', :href => 'http://fonts.googleapis.com/css?family=Allerta+Stencil', :type => 'text/css'} --><!-- %link{:rel => 'stylesheet', :href => 'http://fonts.googleapis.com/css?family=Maiden+Orange', :type => 'text/css'} --><link href="http://fonts.googleapis.com/css?family=Expletus+Sans:700" rel="stylesheet" type="text/css">
-<link href="http://fonts.googleapis.com/css?family=Droid+Serif" rel="stylesheet" type="text/css">
-<script type="text/javascript">
+  <head>
+    <title>Simple yet secure file server</title>
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type' />
+    <meta content=', sinatra, ruby, nginx, redis' name='keywords' />
+    <link href='/assets/css/pygment.css' media='screen' rel='stylesheet' type='text/css' />
+    <link href='/assets/css/style.css' media='screen' rel='stylesheet' type='text/css' />
+    <script src='/assets/js/jquery-1.6.min.js' type='text/javascript'></script>
+    <script src='/assets/js/humane.js' type='text/javascript'></script>
+    <script src='/assets/js/app.js' type='text/javascript'></script>
+    <link href='http://feeds.feedburner.com/schmurfy' rel='alternate' title='schmurfy.github.com' type='application/atom+xml' />
+    <!-- %link{:rel => 'stylesheet', :href => 'http://fonts.googleapis.com/css?family=Aclonica', :type => 'text/css'} -->
+    <!-- %link{:rel => 'stylesheet', :href => 'http://fonts.googleapis.com/css?family=Allerta+Stencil', :type => 'text/css'} -->
+    <!-- %link{:rel => 'stylesheet', :href => 'http://fonts.googleapis.com/css?family=Maiden+Orange', :type => 'text/css'} -->
+    <link href='http://fonts.googleapis.com/css?family=Expletus+Sans:700' rel='stylesheet' type='text/css' />
+    <link href='http://fonts.googleapis.com/css?family=Droid+Serif' rel='stylesheet' type='text/css' />
+    <script type='text/javascript'>
           //<![CDATA[
             var _gaq = _gaq || [];
             _gaq.push(['_setAccount', 'UA-23121021-1']);
@@ -21,25 +28,24 @@
             })();
           //]]>
         </script>
-</head>
-<body>
-    <div id="page">
-      <div id="inner-page">
-        <a class="fork_me" href="http://github.com/schmurfy">
-          <img alt="Fork me on GitHub" src="https://d3nwyuy0nl342s.cloudfront.net/img/e6bef7a091f5f3138b8cd40bc3e114258dd68ddf/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67"></a>
-        <div id="header">
-          <h1 class="blog_title">
-            <a href="/">Chained experiments</a>
+  </head>
+  <body>
+    <div id='page'>
+      <div id='inner-page'>
+        <a class='fork_me' href='http://github.com/schmurfy'>
+          <img alt='Fork me on GitHub' src='https://d3nwyuy0nl342s.cloudfront.net/img/e6bef7a091f5f3138b8cd40bc3e114258dd68ddf/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67' />
+        </a>
+        <div id='header'>
+          <h1 class='blog_title'>
+            <a href='/'>Chained experiments</a>
           </h1>
         </div>
-        <div id="content">
-          <div class="article">
-                <h1 class="title">Simple yet secure file server</h1>
-                <div class="article_date date" title="2011-05-03T20:00:00Z">May 03, 2011</div>
-                <div class="tags">
-<a href="/tags/nginx/" class="tag">nginx</a>, <a href="/tags/redis/" class="tag">redis</a>, <a href="/tags/ruby/" class="tag">ruby</a>, <a href="/tags/sinatra/" class="tag">sinatra</a>
-</div>
-                <div class="body">
+        <div id='content'>
+          <div class='article'>
+                <h1 class='title'>Simple yet secure file server</h1>
+                <div class='article_date date' title='2011-05-03T20:00:00Z'>May 03, 2011</div>
+                <div class='tags'><a href="/tags/nginx/" class="tag">nginx</a>, <a href="/tags/redis/" class="tag">redis</a>, <a href="/tags/ruby/" class="tag">ruby</a>, <a href="/tags/sinatra/" class="tag">sinatra</a></div>
+                <div class='body'>
                   <p>This is a problem I faced many times but did not had the opportunity to find a good approach to the problem,
                   recently I faced it once again and found what i consider a really nice way to implement it efficiently and securely.</p>
                   
@@ -60,212 +66,151 @@
                   
                   <h3>The worst method</h3>
                   
-                  <p>  You set up a webserver to serve a defined folder where all your files are
+                  <p>You set up a webserver to serve a defined folder where all your files are
                     and your disable the autoindex feature.</p>
                   
-                  <p>  The problems are:</p>
+                  <p>The problems are:</p>
                   
                   <ul>
-<li>if someone have he link it can download again the file whenever he wants
+                  <li>if someone have he link it can download again the file whenever he wants
                   (it may or may not be a problem depending on your usage)</li>
                   <li>a client with the link can pass it to anyone to download the file</li>
                   <li>a client may guess another file's path and download it</li>
                   </ul>
-<p>  The last time I used this method the filenames were alphanumeric strings
+                  
+                  <p>The last time I used this method the filenames were alphanumeric strings
                     of 32 characters, this at least reduce the guessing risk to nearly zero</p>
                   
                   <h3>The second, slightly better</h3>
                   
-                  <p>  We now have a web application (php, ruby, perl, etc...) which serves the pages
+                  <p>We now have a web application (php, ruby, perl, etc...) which serves the pages
                     to the clients, the files are stored on the disk outside the webserver root and so, are not
                     accessible directly by clients.</p>
                   
-                  <p>  The application authenticate the client (how it is done is irrelevant here) and then the
+                  <p>The application authenticate the client (how it is done is irrelevant here) and then the
                     application sends the file's content itself to the client.</p>
                   
-                  <p>  The problems:</p>
+                  <p>The problems:</p>
                   
                   <ul>
-<li>You monopolize one instance of your application for this task (it is
+                  <li>You monopolize one instance of your application for this task (it is
                   especially a problem with ruby on rails)</li>
                   <li>chances are that streaming the file through your application will slow down
                   the transfer speed and it can takes more resources on the server.</li>
                   </ul>
-<p>  At least with this approach a client can no longer access a file we don't want him
+                  
+                  <p>At least with this approach a client can no longer access a file we don't want him
                     to download and even if he manages to guess another file's name he will just be rejected.</p>
                   
-                  <p>  Clients can still exchanges login/pass but that's another story, let's consider that our
+                  <p>Clients can still exchanges login/pass but that's another story, let's consider that our
                     clients here do not share passwords.</p>
                   
                   <h3>Now we talk</h3>
                   
-                  <p>  I know this is not a terribly big news but apache have support for sending files directly
+                  <p>I know this is not a terribly big news but apache have support for sending files directly
                     to a client when asked by an application running below it, when an application returns
-                    an header "X-Sendfile" pointing to an absolute path on the webserver disk then this file
+                    an header &quot;X-Sendfile&quot; pointing to an absolute path on the webserver disk then this file
                     will be streamed by apache to the client.</p>
                   
-                  <p>  Nginx has a similar feature but it works differently, here is an example config file:</p>
+                  <p>Nginx has a similar feature but it works differently, here is an example config file:</p>
                   
-                  <pre class="language-nginx"><div class="highlight"><pre><span class="k">server</span> <span class="p">{</span>
-  <span class="kn">listen</span> <span class="mi">3000</span><span class="p">;</span>
-
-  <span class="kn">location</span> <span class="s">/</span> <span class="p">{</span>
-    <span class="kn">root</span> <span class="s">'[...]/public'</span><span class="p">;</span>
-
-    <span class="kn">passenger_enabled</span> <span class="no">on</span><span class="p">;</span>
-    <span class="kn">passenger_min_instances</span> <span class="mi">1</span><span class="p">;</span>
-  <span class="p">}</span>
-
-  <span class="kn">location</span> <span class="s">"/data"</span> <span class="p">{</span>
-    <span class="kn">internal</span><span class="p">;</span>
-    <span class="kn">root</span> <span class="s">"/path/to/data"</span><span class="p">;</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</pre></div>
-</pre>
+                  <pre class="language-nginx">&#x000A;server {&#x000A;  listen 3000;&#x000A;&#x000A;  location / {&#x000A;    root '[...]/public';&#x000A;&#x000A;    passenger_enabled on;&#x000A;    passenger_min_instances 1;&#x000A;  }&#x000A;&#x000A;  location "/data" {&#x000A;    internal;&#x000A;    root "/path/to/data";&#x000A;  }&#x000A;}</pre>
+                    
                   
-                  
-                  <p>  We have a sinatra application running under passenger on port 3000 and we declare
+                  <p>We have a sinatra application running under passenger on port 3000 and we declare
                     an internal location where our files are, the /data path will not be accessible
                     for web clients.</p>
                   
-                  <p>  Now the next part is to send the required headers, here is what a minimal sinatra
-                    application looks like for doing this:</p>
+                  <p>Now the next part is to send the required headers, here is what a minimal sinatra
+                    application looks like for doing this:
+                  <pre class="language-ruby">&#x000A;require 'rubygems'&#x000A;require 'sinatra'</p>&#x000A;&#x000A;<p>get &quot;/:token/*&quot; do&#x000A;  # we use splat here to allow the path to include &quot;/&quot;&#x000A;  path = params[:splat].join('/')&#x000A;  content_type 'application/x-zip'</p>&#x000A;&#x000A;<p>headers(&#x000A;      # Set the filename for the browser, you can force it&#x000A;      # or just use the original one ( File.basename(path) )&#x000A;      &quot;Content-Disposition&quot; =&gt; &quot;attachment; filename=&quot;file.txt&quot;&quot;,</p>&#x000A;&#x000A;<pre><code>  # and ask nginx to send this file to the client&#x000A;  &quot;X-Accel-Redirect&quot; =&gt; &quot;/data/#{path}&quot;&#x000A;)&#x000A;</code></pre>
                   
-                  <pre class="language-ruby"><div class="highlight"><pre><span class="nb">require</span> <span class="s1">'rubygems'</span>
-<span class="nb">require</span> <span class="s1">'sinatra'</span>
-
-<span class="n">get</span> <span class="s2">"/:token/*"</span> <span class="k">do</span>
-  <span class="c1"># we use splat here to allow the path to include "/"</span>
-  <span class="n">path</span> <span class="o">=</span> <span class="n">params</span><span class="o">[</span><span class="ss">:splat</span><span class="o">].</span><span class="n">join</span><span class="p">(</span><span class="s1">'/'</span><span class="p">)</span>
-  <span class="n">content_type</span> <span class="s1">'application/x-zip'</span>
-
-  <span class="n">headers</span><span class="p">(</span>
-      <span class="c1"># Set the filename for the browser, you can force it</span>
-      <span class="c1"># or just use the original one ( File.basename(path) )</span>
-      <span class="s2">"Content-Disposition"</span> <span class="o">=&gt;</span> <span class="s2">"attachment; filename=</span><span class="se">\"</span><span class="s2">file.txt</span><span class="se">\"</span><span class="s2">"</span><span class="p">,</span>
-      
-      <span class="c1"># and ask nginx to send this file to the client</span>
-      <span class="s2">"X-Accel-Redirect"</span> <span class="o">=&gt;</span> <span class="s2">"/data/</span><span class="si">#{</span><span class="n">path</span><span class="si">}</span><span class="s2">"</span>
-    <span class="p">)</span>
-  
-  <span class="c1"># finally return an empty body</span>
-  <span class="k">return</span> <span class="s2">""</span>
-<span class="k">end</span>
-</pre></div>
-</pre>
+                  <p># finally return an empty body
+                    return &quot;&quot;
+                  end
+                  </pre></p>
                   
-                  
-                  <p>  This is a minimal application, no authentication, no security check.
+                  <p>This is a minimal application, no authentication, no security check.
                     Now if we want a full application we need some kind of strategy to ensure the client
                     have access to the file he asked, I did this by using redis:</p>
                   
-                  <p>  When a client wants a file he first needs to ask our main application (this is
+                  <p>When a client wants a file he first needs to ask our main application (this is
                     the one he is connected to), this application will respond with a token and a path (
                     the token is saved in the redis database and set to expire in a fixed delay),
                     the client will then ask the file server for this file with the token just received,
                     here is the complete sinatra application:</p>
                   
-                  <pre class="language-ruby"><div class="highlight"><pre>  <span class="nb">require</span> <span class="s1">'rubygems'</span>
-  <span class="nb">require</span> <span class="s1">'sinatra'</span>
-  <span class="nb">require</span> <span class="s1">'redis'</span>
-
-
-  <span class="n">get</span> <span class="s2">"/:token/*"</span> <span class="k">do</span>
-    <span class="c1"># Connect to the redis database</span>
-    <span class="n">redis</span> <span class="o">=</span> <span class="no">Redis</span><span class="o">.</span><span class="n">new</span>
-    <span class="c1"># check the specified token</span>
-    <span class="n">allowed_path</span> <span class="o">=</span> <span class="n">redis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"file_download:</span><span class="si">#{</span><span class="n">params</span><span class="o">[</span><span class="ss">:token</span><span class="o">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-    <span class="n">path</span> <span class="o">=</span> <span class="n">params</span><span class="o">[</span><span class="ss">:splat</span><span class="o">].</span><span class="n">join</span><span class="p">(</span><span class="s1">'/'</span><span class="p">)</span>
-
-    <span class="c1"># only only passage if the token exists and the path asked</span>
-    <span class="c1"># is the same as the one associated with the token in redis</span>
-    <span class="k">if</span> <span class="n">path</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">allowed_path</span> <span class="o">==</span> <span class="n">path</span><span class="p">)</span>
-      <span class="c1"># set the content type so the browser reacts as expected</span>
-      <span class="n">content_type</span> <span class="s1">'xxx/yyy'</span>
-
-      <span class="n">headers</span><span class="p">(</span>
-          <span class="s2">"Content-Disposition"</span> <span class="o">=&gt;</span> <span class="sx">%{attachment; filename="file.ext"}</span><span class="p">,</span>
-          <span class="s2">"X-Accel-Redirect"</span> <span class="o">=&gt;</span> <span class="s2">"/data/</span><span class="si">#{</span><span class="n">path</span><span class="si">}</span><span class="s2">"</span>
-        <span class="p">)</span>
-      <span class="k">return</span> <span class="s2">""</span>
-    <span class="k">else</span>
-      <span class="c1"># return a 404 if access is refused</span>
-      <span class="c1"># so the client have no way to tells if access was refused</span>
-      <span class="c1"># or the file really does not exists</span>
-      <span class="k">raise</span> <span class="no">Sinatra</span><span class="o">::</span><span class="no">NotFound</span>
-    <span class="k">end</span>
-  <span class="k">end</span>  
-</pre></div>
-</pre>
+                  <pre class="language-ruby">&#x000A;  require 'rubygems'&#x000A;  require 'sinatra'&#x000A;  require 'redis'&#x000A;&#x000A;&#x000A;  get "/:token/*" do&#x000A;    # Connect to the redis database&#x000A;    redis = Redis.new&#x000A;    # check the specified token&#x000A;    allowed_path = redis.get("file_download:#{params[:token]}")&#x000A;    path = params[:splat].join('/')&#x000A;&#x000A;    # only only passage if the token exists and the path asked&#x000A;    # is the same as the one associated with the token in redis&#x000A;    if path && (allowed_path == path)&#x000A;      # set the content type so the browser reacts as expected&#x000A;      content_type 'xxx/yyy'&#x000A;&#x000A;      headers(&#x000A;          "Content-Disposition" => %{attachment; filename="file.ext"},&#x000A;          "X-Accel-Redirect" => "/data/#{path}"&#x000A;        )&#x000A;      return ""&#x000A;    else&#x000A;      # return a 404 if access is refused&#x000A;      # so the client have no way to tells if access was refused&#x000A;      # or the file really does not exists&#x000A;      raise Sinatra::NotFound&#x000A;    end&#x000A;  end  </pre>
+                    
                   
-                  
-                  <p>  Since the keys in redis have an expiration delay the client is only allowed to
+                  <p>Since the keys in redis have an expiration delay the client is only allowed to
                     access the file once and has to make another request to download it again.</p>
                   
-                  <p>  The expiration delay can even be really short since the check is done at the
+                  <p>The expiration delay can even be really short since the check is done at the
                     start of the download, having a too short delay may cause more problems though
                     if the client need to retry the download for any reason.</p>
                   
                   <h2>Conclusion</h2>
                   
-                  <p>  Thanks to redis (it would also work with any database actually) you can distribute the
+                  <p>Thanks to redis (it would also work with any database actually) you can distribute the
                     roles between your applications as you wish and with the configuration shown above any
                     application in your environment could deliver a pass to access a given file allowing
-                    them to share a single "file server" and still maintaining tight access control.</p>
+                    them to share a single &quot;file server&quot; and still maintaining tight access control.</p>
                   
-                  <p>  Following the same idea we could also register a number of allowed downloads in redis
+                  <p>Following the same idea we could also register a number of allowed downloads in redis
                     and decrement the counter each time the url is accessed, the atomic nature of redis
                     operations makes this really easy to do.</p>
                 </div>
               </div>
-          <div class="clear"></div>
+          <div class='clear'></div>
         </div>
-        <div id="sidebox">
+        <div id='sidebox'>
           <h2>General</h2>
           <ul>
-<!-- %li --><!-- %a{:href => "/about.html"} About --><li>
-              <a href="/atom.xml">RSS Feed</a>
+            <!-- %li -->
+            <!-- %a{:href => "/about.html"} About -->
+            <li>
+              <a href='/atom.xml'>RSS Feed</a>
             </li>
           </ul>
-<h2>Projects</h2>
+          <h2>Projects</h2>
           <ul>
-<li>
-              <a href="/projects/drone.html">Drone</a>
+            <li>
+              <a href='/projects/drone.html'>Drone</a>
             </li>
           </ul>
-<h2>Recent posts</h2>
+          <h2>Recent posts</h2>
           <ul>
-<li>
-              <a href="/2011/05/03/simple/yet/secure/file/server.html" title="Full article">Simple yet secure file server</a>
+            <li>
+              <a href='/2011/05/03/simple/yet/secure/file/server.html' title='Full article'>Simple yet secure file server</a>
             </li>
           </ul>
-<h2>Tags</h2>
+          <h2>Tags</h2>
           <ul>
-<li>
-              <a href="/tags/sinatra/">sinatra</a>
+            <li>
+              <a href='/tags/sinatra/'>sinatra</a>
               (1)
             </li>
             <li>
-              <a href="/tags/ruby/">ruby</a>
+              <a href='/tags/ruby/'>ruby</a>
               (1)
             </li>
             <li>
-              <a href="/tags/nginx/">nginx</a>
+              <a href='/tags/nginx/'>nginx</a>
               (1)
             </li>
             <li>
-              <a href="/tags/redis/">redis</a>
+              <a href='/tags/redis/'>redis</a>
               (1)
             </li>
           </ul>
-<h2>Archives</h2>
+          <h2>Archives</h2>
           <ul>
-<li>
-              <a href="/archives.html">All</a>
+            <li>
+              <a href='/archives.html'>All</a>
             </li>
           </ul>
-</div>
+        </div>
       </div>
     </div>
   </body>

@@ -13,11 +13,9 @@
     <id>tag:schmurfy.github.com,2011-05-03:/2011/05/03/simple/yet/secure/file/server.html</id>
     <title type="html">Simple yet secure file server</title>
     <published>2011-05-03T20:00:00Z</published>
-    <updated>2011-05-04T18:31:35Z</updated>
+    <updated>2011-05-04T20:25:11Z</updated>
     <link rel="alternate" href="http://schmurfy.github.com/2011/05/03/simple/yet/secure/file/server.html"/>
-    <content type="html">&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"&gt;
-&lt;html&gt;&lt;body&gt;
-&lt;p&gt;This is a problem I faced many times but did not had the opportunity to find a good approach to the problem,
+    <content type="html">&lt;p&gt;This is a problem I faced many times but did not had the opportunity to find a good approach to the problem,
 recently I faced it once again and found what i consider a really nice way to implement it efficiently and securely.&lt;/p&gt;
 
 &lt;h2&gt;The problem&lt;/h2&gt;
@@ -37,10 +35,10 @@ aside of those I already have a redis server used mostly for caching data.&lt;/p
 
 &lt;h3&gt;The worst method&lt;/h3&gt;
 
-&lt;p&gt;  You set up a webserver to serve a defined folder where all your files are
+&lt;p&gt;You set up a webserver to serve a defined folder where all your files are
   and your disable the autoindex feature.&lt;/p&gt;
 
-&lt;p&gt;  The problems are:&lt;/p&gt;
+&lt;p&gt;The problems are:&lt;/p&gt;
 
 &lt;ul&gt;
 &lt;li&gt;if someone have he link it can download again the file whenever he wants
@@ -48,19 +46,20 @@ aside of those I already have a redis server used mostly for caching data.&lt;/p
 &lt;li&gt;a client with the link can pass it to anyone to download the file&lt;/li&gt;
 &lt;li&gt;a client may guess another file's path and download it&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;  The last time I used this method the filenames were alphanumeric strings
+
+&lt;p&gt;The last time I used this method the filenames were alphanumeric strings
   of 32 characters, this at least reduce the guessing risk to nearly zero&lt;/p&gt;
 
 &lt;h3&gt;The second, slightly better&lt;/h3&gt;
 
-&lt;p&gt;  We now have a web application (php, ruby, perl, etc...) which serves the pages
+&lt;p&gt;We now have a web application (php, ruby, perl, etc...) which serves the pages
   to the clients, the files are stored on the disk outside the webserver root and so, are not
   accessible directly by clients.&lt;/p&gt;
 
-&lt;p&gt;  The application authenticate the client (how it is done is irrelevant here) and then the
+&lt;p&gt;The application authenticate the client (how it is done is irrelevant here) and then the
   application sends the file's content itself to the client.&lt;/p&gt;
 
-&lt;p&gt;  The problems:&lt;/p&gt;
+&lt;p&gt;The problems:&lt;/p&gt;
 
 &lt;ul&gt;
 &lt;li&gt;You monopolize one instance of your application for this task (it is
@@ -68,133 +67,132 @@ especially a problem with ruby on rails)&lt;/li&gt;
 &lt;li&gt;chances are that streaming the file through your application will slow down
 the transfer speed and it can takes more resources on the server.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;  At least with this approach a client can no longer access a file we don't want him
+
+&lt;p&gt;At least with this approach a client can no longer access a file we don't want him
   to download and even if he manages to guess another file's name he will just be rejected.&lt;/p&gt;
 
-&lt;p&gt;  Clients can still exchanges login/pass but that's another story, let's consider that our
+&lt;p&gt;Clients can still exchanges login/pass but that's another story, let's consider that our
   clients here do not share passwords.&lt;/p&gt;
 
 &lt;h3&gt;Now we talk&lt;/h3&gt;
 
-&lt;p&gt;  I know this is not a terribly big news but apache have support for sending files directly
+&lt;p&gt;I know this is not a terribly big news but apache have support for sending files directly
   to a client when asked by an application running below it, when an application returns
-  an header "X-Sendfile" pointing to an absolute path on the webserver disk then this file
+  an header &amp;quot;X-Sendfile&amp;quot; pointing to an absolute path on the webserver disk then this file
   will be streamed by apache to the client.&lt;/p&gt;
 
-&lt;p&gt;  Nginx has a similar feature but it works differently, here is an example config file:&lt;/p&gt;
+&lt;p&gt;Nginx has a similar feature but it works differently, here is an example config file:&lt;/p&gt;
 
-&lt;pre class="language-nginx"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="k"&gt;server&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-  &lt;span class="kn"&gt;listen&lt;/span&gt; &lt;span class="mi"&gt;3000&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;pre class="language-nginx"&gt;
+server {
+  listen 3000;
 
-  &lt;span class="kn"&gt;location&lt;/span&gt; &lt;span class="s"&gt;/&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-    &lt;span class="kn"&gt;root&lt;/span&gt; &lt;span class="s"&gt;'[...]/public'&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  location / {
+    root '[...]/public';
 
-    &lt;span class="kn"&gt;passenger_enabled&lt;/span&gt; &lt;span class="no"&gt;on&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="kn"&gt;passenger_min_instances&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-  &lt;span class="p"&gt;}&lt;/span&gt;
+    passenger_enabled on;
+    passenger_min_instances 1;
+  }
 
-  &lt;span class="kn"&gt;location&lt;/span&gt; &lt;span class="s"&gt;"/data"&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-    &lt;span class="kn"&gt;internal&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="kn"&gt;root&lt;/span&gt; &lt;span class="s"&gt;"/path/to/data"&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-  &lt;span class="p"&gt;}&lt;/span&gt;
-&lt;span class="p"&gt;}&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
+  location "/data" {
+    internal;
+    root "/path/to/data";
+  }
+}
 &lt;/pre&gt;
+  
 
-
-&lt;p&gt;  We have a sinatra application running under passenger on port 3000 and we declare
+&lt;p&gt;We have a sinatra application running under passenger on port 3000 and we declare
   an internal location where our files are, the /data path will not be accessible
   for web clients.&lt;/p&gt;
 
-&lt;p&gt;  Now the next part is to send the required headers, here is what a minimal sinatra
-  application looks like for doing this:&lt;/p&gt;
+&lt;p&gt;Now the next part is to send the required headers, here is what a minimal sinatra
+  application looks like for doing this:
+&lt;pre class="language-ruby"&gt;
+require 'rubygems'
+require 'sinatra'&lt;/p&gt;
 
-&lt;pre class="language-ruby"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;require&lt;/span&gt; &lt;span class="s1"&gt;'rubygems'&lt;/span&gt;
-&lt;span class="nb"&gt;require&lt;/span&gt; &lt;span class="s1"&gt;'sinatra'&lt;/span&gt;
+&lt;p&gt;get &amp;quot;/:token/*&amp;quot; do
+  # we use splat here to allow the path to include &amp;quot;/&amp;quot;
+  path = params[:splat].join('/')
+  content_type 'application/x-zip'&lt;/p&gt;
 
-&lt;span class="n"&gt;get&lt;/span&gt; &lt;span class="s2"&gt;"/:token/*"&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;
-  &lt;span class="c1"&gt;# we use splat here to allow the path to include "/"&lt;/span&gt;
-  &lt;span class="n"&gt;path&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;params&lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="ss"&gt;:splat&lt;/span&gt;&lt;span class="o"&gt;].&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'/'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-  &lt;span class="n"&gt;content_type&lt;/span&gt; &lt;span class="s1"&gt;'application/x-zip'&lt;/span&gt;
+&lt;p&gt;headers(
+      # Set the filename for the browser, you can force it
+      # or just use the original one ( File.basename(path) )
+      &amp;quot;Content-Disposition&amp;quot; =&amp;gt; &amp;quot;attachment; filename=&amp;quot;file.txt&amp;quot;&amp;quot;,&lt;/p&gt;
 
-  &lt;span class="n"&gt;headers&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
-      &lt;span class="c1"&gt;# Set the filename for the browser, you can force it&lt;/span&gt;
-      &lt;span class="c1"&gt;# or just use the original one ( File.basename(path) )&lt;/span&gt;
-      &lt;span class="s2"&gt;"Content-Disposition"&lt;/span&gt; &lt;span class="o"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="s2"&gt;"attachment; filename=&lt;/span&gt;&lt;span class="se"&gt;\"&lt;/span&gt;&lt;span class="s2"&gt;file.txt&lt;/span&gt;&lt;span class="se"&gt;\"&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
-      
-      &lt;span class="c1"&gt;# and ask nginx to send this file to the client&lt;/span&gt;
-      &lt;span class="s2"&gt;"X-Accel-Redirect"&lt;/span&gt; &lt;span class="o"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="s2"&gt;"/data/&lt;/span&gt;&lt;span class="si"&gt;#{&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;
-    &lt;span class="p"&gt;)&lt;/span&gt;
-  
-  &lt;span class="c1"&gt;# finally return an empty body&lt;/span&gt;
-  &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="s2"&gt;""&lt;/span&gt;
-&lt;span class="k"&gt;end&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;  # and ask nginx to send this file to the client
+  &amp;quot;X-Accel-Redirect&amp;quot; =&amp;gt; &amp;quot;/data/#{path}&amp;quot;
+)
+&lt;/code&gt;&lt;/pre&gt;
 
+&lt;p&gt;# finally return an empty body
+  return &amp;quot;&amp;quot;
+end
+&lt;/pre&gt;&lt;/p&gt;
 
-&lt;p&gt;  This is a minimal application, no authentication, no security check.
+&lt;p&gt;This is a minimal application, no authentication, no security check.
   Now if we want a full application we need some kind of strategy to ensure the client
   have access to the file he asked, I did this by using redis:&lt;/p&gt;
 
-&lt;p&gt;  When a client wants a file he first needs to ask our main application (this is
+&lt;p&gt;When a client wants a file he first needs to ask our main application (this is
   the one he is connected to), this application will respond with a token and a path (
   the token is saved in the redis database and set to expire in a fixed delay),
   the client will then ask the file server for this file with the token just received,
   here is the complete sinatra application:&lt;/p&gt;
 
-&lt;pre class="language-ruby"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;  &lt;span class="nb"&gt;require&lt;/span&gt; &lt;span class="s1"&gt;'rubygems'&lt;/span&gt;
-  &lt;span class="nb"&gt;require&lt;/span&gt; &lt;span class="s1"&gt;'sinatra'&lt;/span&gt;
-  &lt;span class="nb"&gt;require&lt;/span&gt; &lt;span class="s1"&gt;'redis'&lt;/span&gt;
+&lt;pre class="language-ruby"&gt;
+  require 'rubygems'
+  require 'sinatra'
+  require 'redis'
 
 
-  &lt;span class="n"&gt;get&lt;/span&gt; &lt;span class="s2"&gt;"/:token/*"&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;
-    &lt;span class="c1"&gt;# Connect to the redis database&lt;/span&gt;
-    &lt;span class="n"&gt;redis&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="no"&gt;Redis&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;new&lt;/span&gt;
-    &lt;span class="c1"&gt;# check the specified token&lt;/span&gt;
-    &lt;span class="n"&gt;allowed_path&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;redis&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"file_download:&lt;/span&gt;&lt;span class="si"&gt;#{&lt;/span&gt;&lt;span class="n"&gt;params&lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="ss"&gt;:token&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-    &lt;span class="n"&gt;path&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;params&lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="ss"&gt;:splat&lt;/span&gt;&lt;span class="o"&gt;].&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'/'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  get "/:token/*" do
+    # Connect to the redis database
+    redis = Redis.new
+    # check the specified token
+    allowed_path = redis.get("file_download:#{params[:token]}")
+    path = params[:splat].join('/')
 
-    &lt;span class="c1"&gt;# only only passage if the token exists and the path asked&lt;/span&gt;
-    &lt;span class="c1"&gt;# is the same as the one associated with the token in redis&lt;/span&gt;
-    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;path&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;allowed_path&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-      &lt;span class="c1"&gt;# set the content type so the browser reacts as expected&lt;/span&gt;
-      &lt;span class="n"&gt;content_type&lt;/span&gt; &lt;span class="s1"&gt;'xxx/yyy'&lt;/span&gt;
+    # only only passage if the token exists and the path asked
+    # is the same as the one associated with the token in redis
+    if path &amp;&amp; (allowed_path == path)
+      # set the content type so the browser reacts as expected
+      content_type 'xxx/yyy'
 
-      &lt;span class="n"&gt;headers&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
-          &lt;span class="s2"&gt;"Content-Disposition"&lt;/span&gt; &lt;span class="o"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="sx"&gt;%{attachment; filename="file.ext"}&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
-          &lt;span class="s2"&gt;"X-Accel-Redirect"&lt;/span&gt; &lt;span class="o"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="s2"&gt;"/data/&lt;/span&gt;&lt;span class="si"&gt;#{&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;
-        &lt;span class="p"&gt;)&lt;/span&gt;
-      &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="s2"&gt;""&lt;/span&gt;
-    &lt;span class="k"&gt;else&lt;/span&gt;
-      &lt;span class="c1"&gt;# return a 404 if access is refused&lt;/span&gt;
-      &lt;span class="c1"&gt;# so the client have no way to tells if access was refused&lt;/span&gt;
-      &lt;span class="c1"&gt;# or the file really does not exists&lt;/span&gt;
-      &lt;span class="k"&gt;raise&lt;/span&gt; &lt;span class="no"&gt;Sinatra&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="no"&gt;NotFound&lt;/span&gt;
-    &lt;span class="k"&gt;end&lt;/span&gt;
-  &lt;span class="k"&gt;end&lt;/span&gt;  
-&lt;/pre&gt;&lt;/div&gt;
+      headers(
+          "Content-Disposition" =&gt; %{attachment; filename="file.ext"},
+          "X-Accel-Redirect" =&gt; "/data/#{path}"
+        )
+      return ""
+    else
+      # return a 404 if access is refused
+      # so the client have no way to tells if access was refused
+      # or the file really does not exists
+      raise Sinatra::NotFound
+    end
+  end  
 &lt;/pre&gt;
+  
 
-
-&lt;p&gt;  Since the keys in redis have an expiration delay the client is only allowed to
+&lt;p&gt;Since the keys in redis have an expiration delay the client is only allowed to
   access the file once and has to make another request to download it again.&lt;/p&gt;
 
-&lt;p&gt;  The expiration delay can even be really short since the check is done at the
+&lt;p&gt;The expiration delay can even be really short since the check is done at the
   start of the download, having a too short delay may cause more problems though
   if the client need to retry the download for any reason.&lt;/p&gt;
 
 &lt;h2&gt;Conclusion&lt;/h2&gt;
 
-&lt;p&gt;  Thanks to redis (it would also work with any database actually) you can distribute the
+&lt;p&gt;Thanks to redis (it would also work with any database actually) you can distribute the
   roles between your applications as you wish and with the configuration shown above any
   application in your environment could deliver a pass to access a given file allowing
-  them to share a single "file server" and still maintaining tight access control.&lt;/p&gt;
+  them to share a single &amp;quot;file server&amp;quot; and still maintaining tight access control.&lt;/p&gt;
 
-&lt;p&gt;  Following the same idea we could also register a number of allowed downloads in redis
+&lt;p&gt;Following the same idea we could also register a number of allowed downloads in redis
   and decrement the counter each time the url is accessed, the atomic nature of redis
   operations makes this really easy to do.&lt;/p&gt;
-&lt;/body&gt;&lt;/html&gt;
 </content>
   </entry>
 </feed>
