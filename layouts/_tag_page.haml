@@ -5,4 +5,4 @@
 
 .tag-page
   - items_with_tag(tag).each do |item|
-    %p= item[:title]
+    %a{:href => route_path(item)}= item[:title]
