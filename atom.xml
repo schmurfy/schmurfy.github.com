@@ -1,10 +1,23 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-<?xml version="1.0" encoding="UTF-8"?><html><body><feed xmlns="http://www.w3.org/2005/Atom"><id>http://schmurfy.github.com/</id><title>schmurfy.github.com Syndication</title>
-<updated>2011-05-03T20:00:00Z</updated><link rel="alternate" href="http://schmurfy.github.com/">
-<link rel="self" href="http://schmurfy.github.com/atom.xml">
-<author><name>Julien Ammous</name><uri>http://schmurfy.github.com</uri></author><entry><id>tag:schmurfy.github.com,2011-05-03:/2011/05/03/simple/yet/secure/file/server.html</id><title type="html">Simple yet secure file server</title>
-<published>2011-05-03T20:00:00Z</published><updated>2011-05-04T18:31:35Z</updated><link rel="alternate" href="http://schmurfy.github.com/2011/05/03/simple/yet/secure/file/server.html">
-<content type="html">&lt;p&gt;This is a problem I faced many times but did not had the opportunity to find a good approach to the problem,
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <id>http://schmurfy.github.com/</id>
+  <title>schmurfy.github.com Syndication</title>
+  <updated>2011-05-03T20:00:00Z</updated>
+  <link rel="alternate" href="http://schmurfy.github.com/"/>
+  <link rel="self" href="http://schmurfy.github.com/atom.xml"/>
+  <author>
+    <name>Julien Ammous</name>
+    <uri>http://schmurfy.github.com</uri>
+  </author>
+  <entry>
+    <id>tag:schmurfy.github.com,2011-05-03:/2011/05/03/simple/yet/secure/file/server.html</id>
+    <title type="html">Simple yet secure file server</title>
+    <published>2011-05-03T20:00:00Z</published>
+    <updated>2011-05-04T18:31:35Z</updated>
+    <link rel="alternate" href="http://schmurfy.github.com/2011/05/03/simple/yet/secure/file/server.html"/>
+    <content type="html">&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd"&gt;
+&lt;html&gt;&lt;body&gt;
+&lt;p&gt;This is a problem I faced many times but did not had the opportunity to find a good approach to the problem,
 recently I faced it once again and found what i consider a really nice way to implement it efficiently and securely.&lt;/p&gt;
 
 &lt;h2&gt;The problem&lt;/h2&gt;
@@ -35,8 +48,6 @@ aside of those I already have a redis server used mostly for caching data.&lt;/p
 &lt;li&gt;a client with the link can pass it to anyone to download the file&lt;/li&gt;
 &lt;li&gt;a client may guess another file's path and download it&lt;/li&gt;
 &lt;/ul&gt;
-
-
 &lt;p&gt;  The last time I used this method the filenames were alphanumeric strings
   of 32 characters, this at least reduce the guessing risk to nearly zero&lt;/p&gt;
 
@@ -57,8 +68,6 @@ especially a problem with ruby on rails)&lt;/li&gt;
 &lt;li&gt;chances are that streaming the file through your application will slow down
 the transfer speed and it can takes more resources on the server.&lt;/li&gt;
 &lt;/ul&gt;
-
-
 &lt;p&gt;  At least with this approach a client can no longer access a file we don't want him
   to download and even if he manages to guess another file's name he will just be rejected.&lt;/p&gt;
 
@@ -74,22 +83,22 @@ the transfer speed and it can takes more resources on the server.&lt;/li&gt;
 
 &lt;p&gt;  Nginx has a similar feature but it works differently, here is an example config file:&lt;/p&gt;
 
-&lt;pre class="language-nginx"&gt;
-server {
-  listen 3000;
+&lt;pre class="language-nginx"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="k"&gt;server&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+  &lt;span class="kn"&gt;listen&lt;/span&gt; &lt;span class="mi"&gt;3000&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 
-  location / {
-    root '[...]/public';
+  &lt;span class="kn"&gt;location&lt;/span&gt; &lt;span class="s"&gt;/&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="kn"&gt;root&lt;/span&gt; &lt;span class="s"&gt;'[...]/public'&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 
-    passenger_enabled on;
-    passenger_min_instances 1;
-  }
+    &lt;span class="kn"&gt;passenger_enabled&lt;/span&gt; &lt;span class="no"&gt;on&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="kn"&gt;passenger_min_instances&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
 
-  location "/data" {
-    internal;
-    root "/path/to/data";
-  }
-}
+  &lt;span class="kn"&gt;location&lt;/span&gt; &lt;span class="s"&gt;"/data"&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="kn"&gt;internal&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="kn"&gt;root&lt;/span&gt; &lt;span class="s"&gt;"/path/to/data"&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;/pre&gt;
 
 
@@ -100,27 +109,27 @@ server {
 &lt;p&gt;  Now the next part is to send the required headers, here is what a minimal sinatra
   application looks like for doing this:&lt;/p&gt;
 
-&lt;pre class="language-ruby"&gt;
-require 'rubygems'
-require 'sinatra'
+&lt;pre class="language-ruby"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;require&lt;/span&gt; &lt;span class="s1"&gt;'rubygems'&lt;/span&gt;
+&lt;span class="nb"&gt;require&lt;/span&gt; &lt;span class="s1"&gt;'sinatra'&lt;/span&gt;
 
-get "/:token/*" do
-  # we use splat here to allow the path to include "/"
-  path = params[:splat].join('/')
-  content_type 'application/x-zip'
+&lt;span class="n"&gt;get&lt;/span&gt; &lt;span class="s2"&gt;"/:token/*"&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;
+  &lt;span class="c1"&gt;# we use splat here to allow the path to include "/"&lt;/span&gt;
+  &lt;span class="n"&gt;path&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;params&lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="ss"&gt;:splat&lt;/span&gt;&lt;span class="o"&gt;].&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'/'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="n"&gt;content_type&lt;/span&gt; &lt;span class="s1"&gt;'application/x-zip'&lt;/span&gt;
 
-  headers(
-      # Set the filename for the browser, you can force it
-      # or just use the original one ( File.basename(path) )
-      "Content-Disposition" =&gt; "attachment; filename=\"file.txt\"",
+  &lt;span class="n"&gt;headers&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+      &lt;span class="c1"&gt;# Set the filename for the browser, you can force it&lt;/span&gt;
+      &lt;span class="c1"&gt;# or just use the original one ( File.basename(path) )&lt;/span&gt;
+      &lt;span class="s2"&gt;"Content-Disposition"&lt;/span&gt; &lt;span class="o"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="s2"&gt;"attachment; filename=&lt;/span&gt;&lt;span class="se"&gt;\"&lt;/span&gt;&lt;span class="s2"&gt;file.txt&lt;/span&gt;&lt;span class="se"&gt;\"&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
       
-      # and ask nginx to send this file to the client
-      "X-Accel-Redirect" =&gt; "/data/#{path}"
-    )
+      &lt;span class="c1"&gt;# and ask nginx to send this file to the client&lt;/span&gt;
+      &lt;span class="s2"&gt;"X-Accel-Redirect"&lt;/span&gt; &lt;span class="o"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="s2"&gt;"/data/&lt;/span&gt;&lt;span class="si"&gt;#{&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;
+    &lt;span class="p"&gt;)&lt;/span&gt;
   
-  # finally return an empty body
-  return ""
-end
+  &lt;span class="c1"&gt;# finally return an empty body&lt;/span&gt;
+  &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="s2"&gt;""&lt;/span&gt;
+&lt;span class="k"&gt;end&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 &lt;/pre&gt;
 
 
@@ -134,37 +143,37 @@ end
   the client will then ask the file server for this file with the token just received,
   here is the complete sinatra application:&lt;/p&gt;
 
-&lt;pre class="language-ruby"&gt;
-  require 'rubygems'
-  require 'sinatra'
-  require 'redis'
+&lt;pre class="language-ruby"&gt;&lt;div class="highlight"&gt;&lt;pre&gt;  &lt;span class="nb"&gt;require&lt;/span&gt; &lt;span class="s1"&gt;'rubygems'&lt;/span&gt;
+  &lt;span class="nb"&gt;require&lt;/span&gt; &lt;span class="s1"&gt;'sinatra'&lt;/span&gt;
+  &lt;span class="nb"&gt;require&lt;/span&gt; &lt;span class="s1"&gt;'redis'&lt;/span&gt;
 
 
-  get "/:token/*" do
-    # Connect to the redis database
-    redis = Redis.new
-    # check the specified token
-    allowed_path = redis.get("file_download:#{params[:token]}")
-    path = params[:splat].join('/')
+  &lt;span class="n"&gt;get&lt;/span&gt; &lt;span class="s2"&gt;"/:token/*"&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;
+    &lt;span class="c1"&gt;# Connect to the redis database&lt;/span&gt;
+    &lt;span class="n"&gt;redis&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="no"&gt;Redis&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;new&lt;/span&gt;
+    &lt;span class="c1"&gt;# check the specified token&lt;/span&gt;
+    &lt;span class="n"&gt;allowed_path&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;redis&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"file_download:&lt;/span&gt;&lt;span class="si"&gt;#{&lt;/span&gt;&lt;span class="n"&gt;params&lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="ss"&gt;:token&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="n"&gt;path&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;params&lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="ss"&gt;:splat&lt;/span&gt;&lt;span class="o"&gt;].&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'/'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 
-    # only only passage if the token exists and the path asked
-    # is the same as the one associated with the token in redis
-    if path &amp;&amp; (allowed_path == path)
-      # set the content type so the browser reacts as expected
-      content_type 'xxx/yyy'
+    &lt;span class="c1"&gt;# only only passage if the token exists and the path asked&lt;/span&gt;
+    &lt;span class="c1"&gt;# is the same as the one associated with the token in redis&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;path&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;allowed_path&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+      &lt;span class="c1"&gt;# set the content type so the browser reacts as expected&lt;/span&gt;
+      &lt;span class="n"&gt;content_type&lt;/span&gt; &lt;span class="s1"&gt;'xxx/yyy'&lt;/span&gt;
 
-      headers(
-          "Content-Disposition" =&gt; %{attachment; filename="file.ext"},
-          "X-Accel-Redirect" =&gt; "/data/#{path}"
-        )
-      return ""
-    else
-      # return a 404 if access is refused
-      # so the client have no way to tells if access was refused
-      # or the file really does not exists
-      raise Sinatra::NotFound
-    end
-  end  
+      &lt;span class="n"&gt;headers&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+          &lt;span class="s2"&gt;"Content-Disposition"&lt;/span&gt; &lt;span class="o"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="sx"&gt;%{attachment; filename="file.ext"}&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+          &lt;span class="s2"&gt;"X-Accel-Redirect"&lt;/span&gt; &lt;span class="o"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="s2"&gt;"/data/&lt;/span&gt;&lt;span class="si"&gt;#{&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;
+        &lt;span class="p"&gt;)&lt;/span&gt;
+      &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="s2"&gt;""&lt;/span&gt;
+    &lt;span class="k"&gt;else&lt;/span&gt;
+      &lt;span class="c1"&gt;# return a 404 if access is refused&lt;/span&gt;
+      &lt;span class="c1"&gt;# so the client have no way to tells if access was refused&lt;/span&gt;
+      &lt;span class="c1"&gt;# or the file really does not exists&lt;/span&gt;
+      &lt;span class="k"&gt;raise&lt;/span&gt; &lt;span class="no"&gt;Sinatra&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="no"&gt;NotFound&lt;/span&gt;
+    &lt;span class="k"&gt;end&lt;/span&gt;
+  &lt;span class="k"&gt;end&lt;/span&gt;  
+&lt;/pre&gt;&lt;/div&gt;
 &lt;/pre&gt;
 
 
@@ -185,4 +194,7 @@ end
 &lt;p&gt;  Following the same idea we could also register a number of allowed downloads in redis
   and decrement the counter each time the url is accessed, the atomic nature of redis
   operations makes this really easy to do.&lt;/p&gt;
-</content></entry></feed></body></html>
+&lt;/body&gt;&lt;/html&gt;
+</content>
+  </entry>
+</feed>
