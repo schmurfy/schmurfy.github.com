@@ -3,7 +3,7 @@
 <updated>2011-05-03T20:00:00Z</updated><link rel="alternate" href="http://schmurfy.github.com/">
 <link rel="self" href="http://schmurfy.github.com/atom.xml">
 <author><name>Julien Ammous</name><uri>http://schmurfy.github.com</uri></author><entry><id>tag:schmurfy.github.com,2011-05-03:/2011/05/03/simple/yet/secure/file/server.html</id><title type="html">Simple yet secure file server</title>
-<published>2011-05-03T20:00:00Z</published><updated>2011-05-04T14:34:59Z</updated><link rel="alternate" href="http://schmurfy.github.com/2011/05/03/simple/yet/secure/file/server.html">
+<published>2011-05-03T20:00:00Z</published><updated>2011-05-04T18:31:35Z</updated><link rel="alternate" href="http://schmurfy.github.com/2011/05/03/simple/yet/secure/file/server.html">
 <content type="html">&lt;p&gt;This is a problem I faced many times but did not had the opportunity to find a good approach to the problem,
 recently I faced it once again and found what i consider a really nice way to implement it efficiently and securely.&lt;/p&gt;
 
