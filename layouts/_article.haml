@@ -1,0 +1,16 @@
+---
+---
+
+.article
+  %h1.title= item[:title]
+  - if item[:kind] == 'article'
+    .article_date.date{:title => iso8601_time(item[:created_at]) }= pretty_time(item[:created_at])
+    - if item[:tags]
+      .tags= tag_list(item)
+
+  .body
+    != content || partial(item)
+    
+    - if disqus_shortname
+      .clear
+      = render('_disqus', :item => @item)

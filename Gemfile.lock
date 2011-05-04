@@ -1,0 +1,48 @@
+GEM
+  remote: http://rubygems.org/
+  specs:
+    activesupport (3.0.7)
+    builder (3.0.0)
+    chunky_png (1.1.1)
+    compass (0.11.1)
+      chunky_png (~> 1.1)
+      fssm (>= 0.2.7)
+      sass (~> 3.1)
+    cri (1.0.1)
+    fssm (0.2.7)
+    growl (1.0.3)
+    guard (0.3.4)
+      thor (~> 0.14.6)
+    guard-nanoc (0.1.0)
+      guard (>= 0.2.1)
+      nanoc (>= 3.1.5)
+    haml (3.1.1)
+    mime-types (1.16)
+    nanoc (3.1.6)
+      nanoc3 (>= 3.1.6)
+    nanoc3 (3.1.6)
+      cri (>= 1.0.0)
+    nokogiri (1.4.4)
+    rake (0.8.7)
+    rb-fsevent (0.4.0)
+    rdiscount (1.6.8)
+    sass (3.1.1)
+    thor (0.14.6)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  activesupport
+  builder
+  compass
+  growl
+  guard
+  guard-nanoc
+  haml
+  mime-types
+  nanoc
+  nokogiri
+  rake
+  rb-fsevent
+  rdiscount

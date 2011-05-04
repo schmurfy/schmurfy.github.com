@@ -1,0 +1,76 @@
+---
+---
+!!! Strict
+%html
+  %head
+    %title= "#{@item[:title]}"
+    %meta{:content =>"text/html; charset=utf-8", :'http-equiv' => "Content-Type"}
+    %meta{:name => "keywords", :content => "#{keywords}"}
+    %link{:rel => 'stylesheet', :href => '/assets/css/pygment.css', :type => 'text/css', :media => 'screen'}
+    %link{:rel => 'stylesheet', :href => '/assets/css/style.css', :type => 'text/css', :media => 'screen'}
+    %script{:type => "text/javascript", :src => "/assets/js/jquery-1.6.min.js"}
+    %script{:type => "text/javascript", :src => "/assets/js/humane.js"}
+    %script{:type => "text/javascript", :src => "/assets/js/app.js"}
+    
+    / %link{:rel => "alternate" :type => "application/atom+xml", :title => "schmurfy.github.com", :href => "http://feeds.feedburner.com/schmurfy" }
+    
+    / %link{:rel => 'stylesheet', :href => 'http://fonts.googleapis.com/css?family=Aclonica', :type => 'text/css'}
+    / %link{:rel => 'stylesheet', :href => 'http://fonts.googleapis.com/css?family=Allerta+Stencil', :type => 'text/css'}
+    / %link{:rel => 'stylesheet', :href => 'http://fonts.googleapis.com/css?family=Maiden+Orange', :type => 'text/css'}
+    %link{:rel => 'stylesheet', :href => 'http://fonts.googleapis.com/css?family=Expletus+Sans:700', :type => 'text/css'}
+    %link{:rel => 'stylesheet', :href => 'http://fonts.googleapis.com/css?family=Droid+Serif', :type => 'text/css'}
+
+  %body
+    -# needed since some content render <pre> blocks
+    - content = find_and_preserve(yield)
+    #page
+      #inner-page
+        %a.fork_me{:href => "http://github.com/schmurfy"}
+          %img{:src => "https://d3nwyuy0nl342s.cloudfront.net/img/e6bef7a091f5f3138b8cd40bc3e114258dd68ddf/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67", :alt => "Fork me on GitHub" }
+        
+        #header
+          %h1.blog_title
+            %a{:href => '/'} Chained experiments
+        
+        #content
+          - if @item[:kind] == 'article'
+            = render('_article', :item => @item, :content => content)
+          - else
+            = content
+          .clear
+          
+        #sidebox
+          %h2 General
+          %ul
+            / %li
+            /   %a{:href => "/about.html"} About
+            %li
+              %a{:href => "/atom.xml" } RSS Feed
+          
+          %h2 Projects
+          %ul
+            %li
+              %a{:href => "/projects/drone.html"} Drone
+          
+          %h2 Recent posts
+          %ul
+            - sorted_articles[0, 4].each do |item|
+              %li
+                %a{:href => "#{route_path(item)}", :title => "Full article" }= item[:title]
+          
+          %h2 Tags
+          %ul
+            - count_tags.to_a.sort_by{|_, c| -c } .each do |(tag, count)|
+              %li
+                %a{:href => "/tags/#{tag.gsub(' ', '-').downcase}/"}= "#{tag}"
+                (#{count})
+          
+          %h2 Archives
+          %ul
+            %li
+              %a{:href => "/archives.html"} All
+            - articles_by_year_month.reject{|y, _| y == Time.now.year }.sort_by{|y, _| -y }.each do |(year, _)|
+              %li= "#{year}"
+    
+    - if @config[:google_analytics]
+      = render('_ganalytics')

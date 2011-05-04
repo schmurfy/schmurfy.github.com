@@ -1,0 +1,201 @@
+//// Variables
+$base_color: #202020;
+$heading_color: $base_color;
+$normal_color: #404040;
+$passive_color: #606060;
+
+// ruby per wikipedia
+$logo_color: white;
+$logo_background_color: #e0115f;
+
+$link_color: $heading_color;
+$link_hover_color: #e0115f;
+$link_bg: white;
+
+$tag_color: $link_color;
+
+$border_color: #bbbbbb;
+
+//// Mixins
+
+@mixin main {
+  font-family: "Georgia, Times New Roman, serif"
+/*  font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;*/
+}
+
+@mixin sans {
+  font-family: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif; }
+
+@mixin serif {
+  //font-family: "Lucida Grande",Helvetica,Arial,Verdana,sans-serif
+  font-family: Georgia, Cambria, "Times New Roman", Times, serif; }
+
+@mixin logo-font {
+  font-family: baskerville, palatino, "palatino linotype", georgia, serif; }
+
+@mixin monospace {
+  font-family: Monaco, Consolas, "Lucida Console", "Courier New", Courier, monospace; }
+
+@mixin ul_left {
+  ul {
+    padding: 0;
+    list-style-type: none; } }
+
+//// Styles
+
+// Compass
+@import "compass/reset";
+@import "compass/css3";
+
+$blueprint-grid-columns: 50;
+$blueprint-grid-width : 20px;
+$blueprint-grid-margin: 0;
+
+@import "blueprint";
+
+
+* {
+  @include main;
+  color: $normal_color;
+}
+
+h1, h2, h3, h4 {
+  font-family: "Droid Serif";
+  color: #8B2C1D;
+}
+
+h1 {
+  font-size: 2.3em;
+  color: #5D1D14;
+}
+
+h2 {
+  font-size: 1.5em;
+  font-weight: bold;
+}
+
+h3 {
+/*  font-size: 16px;*/
+  font-size: 1.3em;
+  margin-left: 20px;
+}
+
+UL {
+  margin-left: 25px;
+  LI {
+    list-style-position: inside;
+    list-style: square;
+    padding: 3px 0;
+  }
+}
+
+body {
+  font-size: 100%;
+  background-color: #636769;
+  min-width: 800px;
+
+  #page {
+    width: 1000px;
+    border: 7px solid #4a4d4f;
+    margin: 40px auto 20px auto;
+    @include border-radius(7px);
+    
+    #inner-page {
+      background-color: white;
+      @include border-radius(7px);
+      @include container;
+      background: url("/assets/images/bg.jpg") repeat scroll 0 0 #E8E8E8;
+      position: relative;
+      
+      .fork_me {
+        position: absolute;
+        top: 0;
+        right: 0;
+      }
+      
+      #header {
+        @include column(50);
+        @include box-sizing(border-box);
+        padding: 10px 30px; 
+        text-indent: 50px;
+                
+        h1 {
+/*          font-family: 'Aclonica';*/
+/*          font-family: 'Allerta Stencil';*/
+/*          font-family: 'Maiden Orange';*/
+          font-family: 'Expletus Sans';
+          font-size: 4em;
+          height: 75px;
+          width: 100%;
+          padding-top: 10px;
+          text-align: center;
+          
+          a {
+            @include text-shadow(rgba(white, 1) 2px 1px 0);
+            text-decoration: none;
+          }
+          
+        }
+      }
+      
+      #content {
+        padding: 10px 20px;
+        @include box-sizing(border-box);
+        @include column(38);
+        
+        h1, h2, h3 {
+          padding: 20px 0 5px 0;
+        }
+        
+        .highlight {
+          margin: 10px;
+          font-family: monospace;
+          border: 1px solid #AAA;
+          padding-top: 8px;
+
+          @include box-shadow(grey, 4px, 4px, 10px);
+        }
+        
+        p { margin: 10px 2px; }
+        
+        .article {
+          h1.title {
+            display: inline;
+          }
+          
+          .article_date {
+            display: inline;
+            color: #777;
+            margin-left: 4px;
+          }
+          
+          .body {
+            @include box-sizing(border-box);
+            padding: 34px 20px;
+          }
+          
+        }
+        
+      }
+      
+      #sidebox {
+        @include column(12, true);
+        @include box-sizing(border-box);
+        color: #777;
+        padding-bottom: 20px;
+        font-size: 0.9em;
+        
+        h2 {
+          margin: 20px 0 10px;
+        }
+        
+        UL {
+          margin-left: 20px;
+        }
+        
+      }
+      
+    }
+    
+  }
+}
