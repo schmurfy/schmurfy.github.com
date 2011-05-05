@@ -25,7 +25,7 @@ GEM
     nokogiri (1.4.4)
     rake (0.8.7)
     rb-fsevent (0.4.0)
-    rdiscount (1.6.8)
+    redcarpet (1.12.2)
     sass (3.1.1)
     thor (0.14.6)
 
@@ -45,4 +45,4 @@ DEPENDENCIES
   nokogiri
   rake
   rb-fsevent
-  rdiscount
+  redcarpet

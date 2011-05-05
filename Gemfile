@@ -4,11 +4,10 @@ gem "nanoc"
 gem "rake"
 gem "mime-types"
 gem "haml"
-gem "rdiscount"
+gem 'redcarpet'
 gem 'nokogiri'
 gem 'compass'
 gem "activesupport"
-
 
 group 'guard' do
   gem 'guard'
