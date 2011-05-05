@@ -19,11 +19,18 @@ compile '*' do
 
   if ext == 'erb'
     filter :erb
+    
   elsif ext == 'haml' || ext.nil?
-    filter :haml
+    filter :haml, :ugly => true
+    # syntax coloring
+    filter :pygment
+    
   elsif ext == 'md' || ext == 'markdown'
     filter :erb
     filter :redcarpet
+    # syntax coloring
+    filter :pygment
+    
   else
     raise "Filter is not configured for #{item.identifier} in Rules file."
   end
@@ -31,9 +38,6 @@ compile '*' do
   # use layouts with .html extension or layout specified in meta
   item[:layout] = "none" unless item[:layout] || File.extname(route_path(item)) == '.html' 
   layout 'default' unless item[:layout] == "none"
-  
-  # syntax coloring
-  filter :pygment
 end
 
 route '/assets/css/*/' do
@@ -44,4 +48,4 @@ route '*' do
   route_path(item)
 end
 
-layout '*', :haml #, :format => :html5
+layout '*', :haml , :format => :html5, :ugly => true

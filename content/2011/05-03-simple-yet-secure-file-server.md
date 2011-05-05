@@ -129,36 +129,36 @@ end
   here is the complete sinatra application:
   
 <pre class="language-ruby">
-  require 'rubygems'
-  require 'sinatra'
-  require 'redis'
+require 'rubygems'
+require 'sinatra'
+require 'redis'
 
 
-  get "/:token/*" do
-    # Connect to the redis database
-    redis = Redis.new
-    # check the specified token
-    allowed_path = redis.get("file_download:#{params[:token]}")
-    path = params[:splat].join('/')
+get "/:token/*" do
+  # Connect to the redis database
+  redis = Redis.new
+  # check the specified token
+  allowed_path = redis.get("file_download:#{params[:token]}")
+  path = params[:splat].join('/')
 
-    # only only passage if the token exists and the path asked
-    # is the same as the one associated with the token in redis
-    if path && (allowed_path == path)
-      # set the content type so the browser reacts as expected
-      content_type 'xxx/yyy'
+  # only only passage if the token exists and the path asked
+  # is the same as the one associated with the token in redis
+  if path && (allowed_path == path)
+    # set the content type so the browser reacts as expected
+    content_type 'xxx/yyy'
 
-      headers(
-          "Content-Disposition" => %{attachment; filename="file.ext"},
-          "X-Accel-Redirect" => "/data/#{path}"
-        )
-      return ""
-    else
-      # return a 404 if access is refused
-      # so the client have no way to tells if access was refused
-      # or the file really does not exists
-      raise Sinatra::NotFound
-    end
-  end  
+    headers(
+        "Content-Disposition" => %{attachment; filename="file.ext"},
+        "X-Accel-Redirect" => "/data/#{path}"
+      )
+    return ""
+  else
+    # return a 404 if access is refused
+    # so the client have no way to tells if access was refused
+    # or the file really does not exists
+    raise Sinatra::NotFound
+  end
+end  
 </pre>
   
   Since the keys in redis have an expiration delay the client is only allowed to
