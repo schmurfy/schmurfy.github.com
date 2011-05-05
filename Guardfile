@@ -6,4 +6,5 @@ guard 'nanoc' do
   watch( /^Rules/ )
   watch( /^layouts\//)
   watch( /^content\// )
+  watch( /^lib\// )
 end
