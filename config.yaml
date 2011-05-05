@@ -10,9 +10,8 @@ data_sources:
 # domain to which this site is deployed
 base_url: http://schmurfy.github.com
 
-# google_analytics:
-#   domain: mgutz.com
-#   site_id: UA-9655468-1 
+google_analytics:
+  site_id: UA-23121021-1
 
 # number of full featured posts to display on front
 featured_count: 0

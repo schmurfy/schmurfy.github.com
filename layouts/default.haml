@@ -20,7 +20,10 @@
     / %link{:rel => 'stylesheet', :href => 'http://fonts.googleapis.com/css?family=Maiden+Orange', :type => 'text/css'}
     %link{:rel => 'stylesheet', :href => 'http://fonts.googleapis.com/css?family=Expletus+Sans:700', :type => 'text/css'}
     %link{:rel => 'stylesheet', :href => 'http://fonts.googleapis.com/css?family=Droid+Serif', :type => 'text/css'}
-
+    
+    - if @config[:google_analytics]
+      = render('_ganalytics')
+    
   %body
     #page
       #inner-page
@@ -71,5 +74,3 @@
             - articles_by_year_month.reject{|y, _| y == Time.now.year }.sort_by{|y, _| -y }.each do |(year, _)|
               %li= "#{year}"
     
-    - if @config[:google_analytics]
-      = render('_ganalytics')
