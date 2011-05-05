@@ -210,7 +210,7 @@ body #page #inner-page #content .highlight {
   margin: 10px;
   font-family: monospace;
   border: 1px solid #AAA;
-  padding-top: 8px;
+  padding: 5px 20px;
   -moz-box-shadow: grey, 4px, 4px, 10px;
   -webkit-box-shadow: grey, 4px, 4px, 10px;
   -o-box-shadow: grey, 4px, 4px, 10px;
