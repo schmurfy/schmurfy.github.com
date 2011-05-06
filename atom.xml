@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <id>http://schmurfy.github.com/</id>
   <title>schmurfy.github.com Syndication</title>
-  <updated>2011-05-05T22:00:00Z</updated>
+  <updated>2011-05-06T13:00:00Z</updated>
   <link rel="alternate" href="http://schmurfy.github.com/"/>
   <link rel="self" href="http://schmurfy.github.com/atom.xml"/>
   <author>
@@ -12,8 +12,8 @@
   <entry>
     <id>tag:schmurfy.github.com,2011-05-06:/2011/05/06/create_your_github_user_page_with_nanoc.html</id>
     <title type="html">Create your Github user page with nanoc</title>
-    <published>2011-05-05T22:00:00Z</published>
-    <updated>2011-05-06T13:27:18Z</updated>
+    <published>2011-05-06T13:00:00Z</published>
+    <updated>2011-05-06T13:00:00Z</updated>
     <link rel="alternate" href="http://schmurfy.github.com/2011/05/06/create_your_github_user_page_with_nanoc.html"/>
     <content type="html">&lt;p&gt;I finally took the time to build myself a fully featured blog and start writing down things that floats
 in my head both for me and for anyone it can help.&lt;br&gt;
@@ -120,7 +120,7 @@ when rebuilding the site, it justs overwrite existing files.&lt;/p&gt;</content>
     <id>tag:schmurfy.github.com,2011-05-03:/2011/05/03/simple_yet_secure_file_server.html</id>
     <title type="html">Simple yet secure file server</title>
     <published>2011-05-03T20:00:00Z</published>
-    <updated>2011-05-05T16:23:37Z</updated>
+    <updated>2011-05-03T20:00:00Z</updated>
     <link rel="alternate" href="http://schmurfy.github.com/2011/05/03/simple_yet_secure_file_server.html"/>
     <content type="html">&lt;p&gt;This is a problem I faced many times but did not had the opportunity to find a good approach to the problem,
 recently I faced it once again and found what i consider a really nice way to implement it efficiently and securely.&lt;/p&gt;
