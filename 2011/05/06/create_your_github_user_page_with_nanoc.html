@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Create your Github user page with nanoc</title>
+<meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+<meta content=', nanoc, nanoc3, ruby, github, blog' name='keywords'>
+<link href='/assets/css/pygment.css' media='screen' rel='stylesheet' type='text/css'>
+<link href='/assets/css/style.css' media='screen' rel='stylesheet' type='text/css'>
+<script src='/assets/js/jquery-1.6.min.js' type='text/javascript'></script>
+<script src='/assets/js/humane.js' type='text/javascript'></script>
+<script src='/assets/js/app.js' type='text/javascript'></script>
+<script src='/assets/js/disqus.js' type='text/javascript'></script>
+<link href='http://feeds.feedburner.com/schmurfy' rel='alternate' title='schmurfy.github.com' type='application/atom+xml'>
+<link href='http://fonts.googleapis.com/css?family=Expletus+Sans:700' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Droid+Serif' rel='stylesheet' type='text/css'>
+<script>
+  //<![CDATA[
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-23121021-1']);
+    _gaq.push(['_trackPageview']);
+    
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  //]]>
+</script>
+
+
+</head>
+<body>
+<div id='page'>
+<div id='inner-page'>
+<a class='fork_me' href='http://github.com/schmurfy'>
+<img alt='Fork me on GitHub' src='https://d3nwyuy0nl342s.cloudfront.net/img/e6bef7a091f5f3138b8cd40bc3e114258dd68ddf/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67'>
+</a>
+<div id='header'>
+<h1 class='blog_title'>
+<a href='/'>Chained experiments</a>
+</h1>
+</div>
+<div id='content'>
+<div class='article'>
+<div class='article_date date' title='2011-05-05T22:00:00Z'>May 06, 2011</div>
+<h1 class='title'>Create your Github user page with nanoc</h1>
+<div class='tags'><a href="/tags/blog/" class="tag">blog</a>, <a href="/tags/github/" class="tag">github</a>, <a href="/tags/nanoc/" class="tag">nanoc</a>, <a href="/tags/nanoc3/" class="tag">nanoc3</a>, <a href="/tags/ruby/" class="tag">ruby</a></div>
+<div class='body'>
+<p>I finally took the time to build myself a fully featured blog and start writing down things that floats
+in my head both for me and for anyone it can help.<br>
+I was sure of one thing: I wanted a static blog, I do not want having to learn to use a complex
+admin interface that would certainly not fit me needs and end with a fork to maintain...<br>
+Another reason is that I prefer to edit posts in my favorite text editor (that would be textmate)
+than editing it online with a pale copy of a real text editor.</p>
+
+<p>I was looking at github user pages for quite some time but the quick look I gave to jekyll did not convinced
+me so here is an alternative way to build your github user page without using jekyll.</p>
+
+<h2>What we will use</h2>
+
+<p>Nanoc is a powerful ruby static website generator, I already used it before for a personal documentation
+repository (something like my personal knowledge database) and tested the alternatives before settling on
+it so there was little to no reason to switch except if a new alternative with more features had appeared
+but jekyll is certainly not that.</p>
+
+<p>So nanoc it is !<br></p>
+
+<p>This article will not teach you how to use nanoc by itself, if you are interested in it you can check:</p>
+
+<ul>
+<li><a href="http://nanoc.stoneship.org/">The Official Website</a></li>
+<li><a href="https://github.com/mgutz/nanoc3_blog">The template I based mine on</a></li>
+<li><a href="https://github.com/schmurfy/schmurfy.github.com/tree/source">And obviously my template</a></li>
+</ul><h2>How github user's pages work</h2>
+
+<p>The user page system is really simple to use and works really well, what they did is that if you create a repository
+with a special name (<code>&lt;user&gt;</code>.github.com) then anything pushed in the master branch will be available at the
+same address, pretty neat and effective !</p>
+
+<p>The master branch can either contains raw html/css/... documents or a jekyll project which will be
+used to generate the html so in our case we want to push the resulting output from nanoc.</p>
+
+<h2>Workspace organization</h2>
+
+<p>What I did is use another branch than master to host the actual nanoc application and push the
+resulting html in the master branch, here is how I organized my workspace:</p>
+
+<div class="highlight"><pre>root <span class="o">[</span> -&gt; <span class="s2">"source"</span> <span class="o">]</span>&#x000A;  |- content <span class="o">(</span>nanoc templates<span class="o">)</span>&#x000A;  |- layouts <span class="o">(</span>nanoc layouts<span class="o">)</span>&#x000A;  |- lib <span class="o">(</span>ruby files extending nanoc<span class="o">)</span>&#x000A;  |- output <span class="o">[</span> -&gt; <span class="s2">"master"</span> <span class="o">]</span>&#x000A;  </pre></div>
+
+
+<p>root will contains a working copy of our git repository pointing at the source branch and
+output will contains a working copy of the same repository pointing at the master branch,
+the tricky part here is that these two branches need to be completly separated,
+we wil now see how (there is a guide on github to do this too).</p>
+
+<h2>Setting up things</h2>
+
+<p>First we need to initialize the repository, just use your root folder for this
+("$" is the prompt here):</p>
+
+<div class="highlight"><pre><span class="c"># initialize the local repository</span>&#x000A;  <span class="nv">$ </span>git init&#x000A;<span class="c"># commits your files</span>&#x000A;  <span class="nv">$ </span>git add .&#x000A;  <span class="nv">$ </span>git ci -m <span class="s2">"init"</span> </pre></div>
+
+
+<p>Now we have a master branch containing our site's source which is not yet what we
+want, so we will now rename this branch and push it to the remote:</p>
+
+<div class="highlight"><pre><span class="c"># rename our master branch</span>&#x000A;  <span class="nv">$ </span>git br -m master <span class="nb">source</span>&#x000A;<span class="c"># add your github repository as origin</span>&#x000A;  <span class="nv">$ </span>git add origin git@github.com:<span class="o">[</span>user<span class="o">]</span>/<span class="o">[</span>user<span class="o">]</span>.github.com.git&#x000A;<span class="c"># push to the remote repository and set the master local branch to</span>&#x000A;<span class="c"># track origin/master</span>&#x000A;  <span class="nv">$ </span>git push -u origin master</pre></div>
+
+
+<p>We have a repository with only one branch: source, now we can create the master branch.<br>
+remove the output folder if it exists (rm -rf output) and do this:</p>
+
+<div class="highlight"><pre><span class="c"># fetch a working copy of your repository</span>&#x000A;  <span class="nv">$ </span>git clone git@github.com:<span class="o">[</span>user<span class="o">]</span>/<span class="o">[</span>user<span class="o">]</span>.github.com.git output&#x000A;  <span class="nv">$ </span><span class="nb">cd </span>output&#x000A;<span class="c"># create the isolated branch</span>&#x000A;  <span class="nv">$ </span>git symbolic-ref HEAD refs/heads/master&#x000A;  <span class="nv">$ </span>rm .git/index&#x000A;  <span class="nv">$ </span>git clean -fdx</pre></div>
+
+
+<p>You should now have your master branch ready, just generate your nanoc output
+(nanoc3 co in the root folder) and commit &amp; push your files and your site should
+appears shortly.</p>
+
+<p>(Actually it took a second commit for me for the site to effectively appears)</p>
+
+<p>One thing allowing this setup to work is that nanoc do not delete the output folder
+when rebuilding the site, it justs overwrite existing files.</p>
+<div class='comments'>
+<div id='disqus_thread'></div>
+<script>
+  //<![CDATA[
+    var disqus_shortname = 'chainedexperiments';
+    
+    // The following are highly recommended additional parameters. Remove the slashes in front to use.
+    var disqus_url = 'http://schmurfy.github.com/2011/05/06/create_your_github_user_page_with_nanoc.html';
+    var disqus_identifier = '2011/05/06';
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  //]]>
+</script>
+
+</div>
+
+</div>
+</div>
+
+<div class='clear'></div>
+</div>
+<div id='sidebox'>
+<h2>General</h2>
+<ul>
+<!-- %li -->
+<!-- %a{:href => "/about.html"} About -->
+<li>
+<a href='http://feeds.feedburner.com/schmurfy'>RSS Feed</a>
+</li>
+</ul>
+<h2>Projects</h2>
+<ul>
+<li>
+<a href='/projects/drone.html'>Drone</a>
+</li>
+</ul>
+<h2>Recent posts</h2>
+<ul>
+<li>
+<a href='/2011/05/06/create_your_github_user_page_with_nanoc.html' title='Full article'>Create your Github user page with nanoc</a>
+</li>
+<li>
+<a href='/2011/05/03/simple_yet_secure_file_server.html' title='Full article'>Simple yet secure file server</a>
+</li>
+</ul>
+<h2>Tags</h2>
+<ul>
+<li>
+<a href='/tags/ruby/'>ruby</a>
+(2)
+</li>
+<li>
+<a href='/tags/nanoc/'>nanoc</a>
+(1)
+</li>
+<li>
+<a href='/tags/nginx/'>nginx</a>
+(1)
+</li>
+<li>
+<a href='/tags/redis/'>redis</a>
+(1)
+</li>
+<li>
+<a href='/tags/sinatra/'>sinatra</a>
+(1)
+</li>
+<li>
+<a href='/tags/nanoc3/'>nanoc3</a>
+(1)
+</li>
+<li>
+<a href='/tags/github/'>github</a>
+(1)
+</li>
+<li>
+<a href='/tags/blog/'>blog</a>
+(1)
+</li>
+</ul>
+<h2>Archives</h2>
+<ul>
+<li>
+<a href='/archives.html'>All</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div id='footer'>
+Content and Design © Julien Ammous
+</div>
+</body>
+</html>

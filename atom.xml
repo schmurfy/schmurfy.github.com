@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <id>http://schmurfy.github.com/</id>
   <title>schmurfy.github.com Syndication</title>
-  <updated>2011-05-03T20:00:00Z</updated>
+  <updated>2011-05-05T22:00:00Z</updated>
   <link rel="alternate" href="http://schmurfy.github.com/"/>
   <link rel="self" href="http://schmurfy.github.com/atom.xml"/>
   <author>
@@ -10,11 +10,118 @@
     <uri>http://schmurfy.github.com</uri>
   </author>
   <entry>
-    <id>tag:schmurfy.github.com,2011-05-03:/2011/05/03/simple/yet/secure/file/server.html</id>
+    <id>tag:schmurfy.github.com,2011-05-06:/2011/05/06/create_your_github_user_page_with_nanoc.html</id>
+    <title type="html">Create your Github user page with nanoc</title>
+    <published>2011-05-05T22:00:00Z</published>
+    <updated>2011-05-06T13:27:18Z</updated>
+    <link rel="alternate" href="http://schmurfy.github.com/2011/05/06/create_your_github_user_page_with_nanoc.html"/>
+    <content type="html">&lt;p&gt;I finally took the time to build myself a fully featured blog and start writing down things that floats
+in my head both for me and for anyone it can help.&lt;br&gt;
+I was sure of one thing: I wanted a static blog, I do not want having to learn to use a complex
+admin interface that would certainly not fit me needs and end with a fork to maintain...&lt;br&gt;
+Another reason is that I prefer to edit posts in my favorite text editor (that would be textmate)
+than editing it online with a pale copy of a real text editor.&lt;/p&gt;
+
+&lt;p&gt;I was looking at github user pages for quite some time but the quick look I gave to jekyll did not convinced
+me so here is an alternative way to build your github user page without using jekyll.&lt;/p&gt;
+
+&lt;h2&gt;What we will use&lt;/h2&gt;
+
+&lt;p&gt;Nanoc is a powerful ruby static website generator, I already used it before for a personal documentation
+repository (something like my personal knowledge database) and tested the alternatives before settling on
+it so there was little to no reason to switch except if a new alternative with more features had appeared
+but jekyll is certainly not that.&lt;/p&gt;
+
+&lt;p&gt;So nanoc it is !&lt;br&gt;&lt;/p&gt;
+
+&lt;p&gt;This article will not teach you how to use nanoc by itself, if you are interested in it you can check:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="http://nanoc.stoneship.org/"&gt;The Official Website&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://github.com/mgutz/nanoc3_blog"&gt;The template I based mine on&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://github.com/schmurfy/schmurfy.github.com/tree/source"&gt;And obviously my template&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;h2&gt;How github user's pages work&lt;/h2&gt;
+
+&lt;p&gt;The user page system is really simple to use and works really well, what they did is that if you create a repository
+with a special name (&lt;code&gt;&amp;lt;user&amp;gt;&lt;/code&gt;.github.com) then anything pushed in the master branch will be available at the
+same address, pretty neat and effective !&lt;/p&gt;
+
+&lt;p&gt;The master branch can either contains raw html/css/... documents or a jekyll project which will be
+used to generate the html so in our case we want to push the resulting output from nanoc.&lt;/p&gt;
+
+&lt;h2&gt;Workspace organization&lt;/h2&gt;
+
+&lt;p&gt;What I did is use another branch than master to host the actual nanoc application and push the
+resulting html in the master branch, here is how I organized my workspace:&lt;/p&gt;
+
+&lt;div class="highlight"&gt;&lt;pre&gt;root &lt;span class="o"&gt;[&lt;/span&gt; -&amp;gt; &lt;span class="s2"&gt;"source"&lt;/span&gt; &lt;span class="o"&gt;]&lt;/span&gt;
+  |- content &lt;span class="o"&gt;(&lt;/span&gt;nanoc templates&lt;span class="o"&gt;)&lt;/span&gt;
+  |- layouts &lt;span class="o"&gt;(&lt;/span&gt;nanoc layouts&lt;span class="o"&gt;)&lt;/span&gt;
+  |- lib &lt;span class="o"&gt;(&lt;/span&gt;ruby files extending nanoc&lt;span class="o"&gt;)&lt;/span&gt;
+  |- output &lt;span class="o"&gt;[&lt;/span&gt; -&amp;gt; &lt;span class="s2"&gt;"master"&lt;/span&gt; &lt;span class="o"&gt;]&lt;/span&gt;
+  
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;root will contains a working copy of our git repository pointing at the source branch and
+output will contains a working copy of the same repository pointing at the master branch,
+the tricky part here is that these two branches need to be completly separated,
+we wil now see how (there is a guide on github to do this too).&lt;/p&gt;
+
+&lt;h2&gt;Setting up things&lt;/h2&gt;
+
+&lt;p&gt;First we need to initialize the repository, just use your root folder for this
+("$" is the prompt here):&lt;/p&gt;
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c"&gt;# initialize the local repository&lt;/span&gt;
+  &lt;span class="nv"&gt;$ &lt;/span&gt;git init
+&lt;span class="c"&gt;# commits your files&lt;/span&gt;
+  &lt;span class="nv"&gt;$ &lt;/span&gt;git add .
+  &lt;span class="nv"&gt;$ &lt;/span&gt;git ci -m &lt;span class="s2"&gt;"init"&lt;/span&gt; 
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Now we have a master branch containing our site's source which is not yet what we
+want, so we will now rename this branch and push it to the remote:&lt;/p&gt;
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c"&gt;# rename our master branch&lt;/span&gt;
+  &lt;span class="nv"&gt;$ &lt;/span&gt;git br -m master &lt;span class="nb"&gt;source&lt;/span&gt;
+&lt;span class="c"&gt;# add your github repository as origin&lt;/span&gt;
+  &lt;span class="nv"&gt;$ &lt;/span&gt;git add origin git@github.com:&lt;span class="o"&gt;[&lt;/span&gt;user&lt;span class="o"&gt;]&lt;/span&gt;/&lt;span class="o"&gt;[&lt;/span&gt;user&lt;span class="o"&gt;]&lt;/span&gt;.github.com.git
+&lt;span class="c"&gt;# push to the remote repository and set the master local branch to&lt;/span&gt;
+&lt;span class="c"&gt;# track origin/master&lt;/span&gt;
+  &lt;span class="nv"&gt;$ &lt;/span&gt;git push -u origin master
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;We have a repository with only one branch: source, now we can create the master branch.&lt;br&gt;
+remove the output folder if it exists (rm -rf output) and do this:&lt;/p&gt;
+
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c"&gt;# fetch a working copy of your repository&lt;/span&gt;
+  &lt;span class="nv"&gt;$ &lt;/span&gt;git clone git@github.com:&lt;span class="o"&gt;[&lt;/span&gt;user&lt;span class="o"&gt;]&lt;/span&gt;/&lt;span class="o"&gt;[&lt;/span&gt;user&lt;span class="o"&gt;]&lt;/span&gt;.github.com.git output
+  &lt;span class="nv"&gt;$ &lt;/span&gt;&lt;span class="nb"&gt;cd &lt;/span&gt;output
+&lt;span class="c"&gt;# create the isolated branch&lt;/span&gt;
+  &lt;span class="nv"&gt;$ &lt;/span&gt;git symbolic-ref HEAD refs/heads/master
+  &lt;span class="nv"&gt;$ &lt;/span&gt;rm .git/index
+  &lt;span class="nv"&gt;$ &lt;/span&gt;git clean -fdx
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;You should now have your master branch ready, just generate your nanoc output
+(nanoc3 co in the root folder) and commit &amp;amp; push your files and your site should
+appears shortly.&lt;/p&gt;
+
+&lt;p&gt;(Actually it took a second commit for me for the site to effectively appears)&lt;/p&gt;
+
+&lt;p&gt;One thing allowing this setup to work is that nanoc do not delete the output folder
+when rebuilding the site, it justs overwrite existing files.&lt;/p&gt;</content>
+  </entry>
+  <entry>
+    <id>tag:schmurfy.github.com,2011-05-03:/2011/05/03/simple_yet_secure_file_server.html</id>
     <title type="html">Simple yet secure file server</title>
     <published>2011-05-03T20:00:00Z</published>
-    <updated>2011-05-05T14:28:25Z</updated>
-    <link rel="alternate" href="http://schmurfy.github.com/2011/05/03/simple/yet/secure/file/server.html"/>
+    <updated>2011-05-05T16:23:37Z</updated>
+    <link rel="alternate" href="http://schmurfy.github.com/2011/05/03/simple_yet_secure_file_server.html"/>
     <content type="html">&lt;p&gt;This is a problem I faced many times but did not had the opportunity to find a good approach to the problem,
 recently I faced it once again and found what i consider a really nice way to implement it efficiently and securely.&lt;/p&gt;
 
