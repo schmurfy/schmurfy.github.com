@@ -53,25 +53,12 @@ def create_tag_pages
 end
 
 
-def add_update_item_attributes
-  changes = MGutz::FileChanges.new
-
+def hide_assets
   items.each do |item|
     # do not include assets or xml files in sitemap
     if item[:content_filename]
       ext = File.extname(route_path(item))
       item[:is_hidden] = true if item[:content_filename] =~ /assets\// || ext == '.xml'
-    end
-
-    if item[:kind] == "article"
-      # filename might contain the created_at date
-      item[:created_at] ||= derive_created_at(item)
-      # sometimes nanoc3 stores created_at as Date instead of String causing a bunch of issues
-      item[:created_at] = item[:created_at].to_s if item[:created_at].is_a?(Date)
-
-      # sets updated_at based on content change date not file time
-      change = changes.status(item[:content_filename], item[:created_at], item.raw_content)
-      item[:updated_at] = change[:updated_at].to_s
     end
   end
 end
@@ -204,5 +191,10 @@ end
 
 def link_unless_current(s)
   "<li><a href='/#{s}.html'>#{s}</a></li>" if @item.identifier != "/#{s}/" 
+end
+
+
+def article?
+  item[:kind] == 'article'
 end
 

@@ -7,4 +7,5 @@ guard 'nanoc' do
   watch( /^layouts\//)
   watch( /^content\// )
   watch( /^lib\// )
+  watch( /^static\// )
 end

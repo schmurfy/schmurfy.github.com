@@ -11,7 +11,7 @@
     %script{:type => "text/javascript", :src => "/assets/js/jquery-1.6.min.js"}
     %script{:type => "text/javascript", :src => "/assets/js/humane.js"}
     %script{:type => "text/javascript", :src => "/assets/js/app.js"}
-    -# %script{:type => "text/javascript", :src => "/assets/js/disqus.js"}
+    %script{:type => "text/javascript", :src => "/assets/js/disqus.js"}
     
     %link{:rel => "alternate", :type => "application/atom+xml", :title => "schmurfy.github.com", :href => "http://feeds.feedburner.com/schmurfy" }
     
@@ -36,7 +36,7 @@
         
         #content
           - if @item[:kind] == 'article'
-            ~ render('_article', :item => @item, :content => content)
+            ~ render('_article', :item => @item, :content => content, :disqus => true)
           - else
             ~ yield
           .clear
@@ -49,10 +49,10 @@
             %li
               %a{:href => "http://feeds.feedburner.com/schmurfy" } RSS Feed
           
-          %h2 Projects
-          %ul
-            %li
-              %a{:href => "/projects/drone.html"} Drone
+          / %h2 Projects
+          / %ul
+          /   %li
+          /     %a{:href => "/projects/drone.html"} Drone
           
           %h2 Recent posts
           %ul
@@ -74,3 +74,5 @@
             - articles_by_year_month.reject{|y, _| y == Time.now.year }.sort_by{|y, _| -y }.each do |(year, _)|
               %li= "#{year}"
     
+    #footer
+      Content and Design © Julien Ammous

@@ -61,12 +61,13 @@ $blueprint-grid-margin: 0;
 
 h1, h2, h3, h4 {
   font-family: "Droid Serif";
-  color: #8B2C1D;
+/*  color: #8B2C1D;*/
 }
 
 h1 {
-  font-size: 2.3em;
+  font-size: 2em;
   color: #5D1D14;
+  border-bottom: 3px solid #458934;
 }
 
 h2 {
@@ -93,15 +94,26 @@ UL {
   margin-top: 80px;
 }
 
+.tag-page {
+  margin: 18px 15px;
+}
+
 body {
   font-size: 100%;
   background-color: #636769;
   min-width: 800px;
 
+  #footer {
+    font-size: 1.1em;
+    margin: 0 auto 50px auto;
+    with: 300px;
+    text-align: center;
+  }
+  
   #page {
     width: 1000px;
     border: 7px solid #4a4d4f;
-    margin: 40px auto 20px auto;
+    margin: 40px auto 5px auto;
     @include border-radius(7px);
     
     #inner-page {
@@ -123,16 +135,20 @@ body {
         padding: 10px 30px; 
         text-indent: 50px;
                 
-        h1 {
+        h1.blog_title {
 /*          font-family: 'Aclonica';*/
 /*          font-family: 'Allerta Stencil';*/
 /*          font-family: 'Maiden Orange';*/
           font-family: 'Expletus Sans';
           font-size: 4em;
-          height: 75px;
+          height: 118px;
           width: 100%;
-          padding-top: 10px;
+          padding-top: 50px;
           text-align: center;
+          border: none;
+          
+          background: url("/assets/images/logo.png") no-repeat scroll 22px 13px,
+                      url("/assets/images/logo_shadow.png") no-repeat scroll 23px 15px;
           
           a {
             @include text-shadow(rgba(white, 1) 2px 1px 0);
@@ -163,12 +179,22 @@ body {
         p { margin: 10px 2px; }
         
         .article {
+          margin-bottom: 70px;
+          
           h1.title {
             display: inline;
           }
           
+          .tags {
+            margin-top: 13px;
+            font-size: 1.1em;
+            
+            a {
+              color: #777;
+            }
+          }
+          
           .article_date {
-            display: inline;
             color: #777;
             margin-left: 4px;
           }
@@ -187,6 +213,7 @@ body {
         @include box-sizing(border-box);
         color: #777;
         padding-bottom: 20px;
+        margin-top: 150px;
         font-size: 0.9em;
         
         h2 {

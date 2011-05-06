@@ -4,5 +4,7 @@
   = "#{tag.capitalize} Articles"
 
 .tag-page
+  %ul
   - items_with_tag(tag).each do |item|
-    %a{:href => route_path(item)}= item[:title]
+    %li
+      %a{:href => route_path(item)}= item[:title]

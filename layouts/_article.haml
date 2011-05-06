@@ -2,15 +2,19 @@
 ---
 
 .article
-  %h1.title= item[:title]
-  - if item[:kind] == 'article'
+  - if article?
     .article_date.date{:title => iso8601_time(item[:created_at]) }= pretty_time(item[:created_at])
-    - if item[:tags]
-      .tags= tag_list(item)
+  
+  %h1.title= item[:title]
+  
+  - if article? && item[:tags]
+    .tags= tag_list(item)
 
   .body
     != content || partial(item)
     
     - if disqus_shortname
-      .clear
-      = render('_disqus', :item => @item)
+      - if disqus
+        = render('_disqus', :item => @item)
+      - else
+        %a{:href => "#{route_path(item)}#disqus_thread", :'data-disqus-identifier' => item[:created_at] } Comments

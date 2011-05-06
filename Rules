@@ -6,7 +6,7 @@ preprocess do
 
   copy_static
   create_tag_pages
-  add_update_item_attributes
+  hide_assets
 end
 
 compile '/assets/css/*/' do
