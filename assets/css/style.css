@@ -243,21 +243,25 @@ body #page #inner-page #content .article {
 body #page #inner-page #content .article h1.title {
   display: inline;
 }
-/* line 188, content/assets/css/style.scss */
+/* line 187, content/assets/css/style.scss */
+body #page #inner-page #content .article h1.title a {
+  text-decoration: none;
+}
+/* line 190, content/assets/css/style.scss */
 body #page #inner-page #content .article .tags {
   margin-top: 13px;
   font-size: 1.1em;
 }
-/* line 192, content/assets/css/style.scss */
+/* line 194, content/assets/css/style.scss */
 body #page #inner-page #content .article .tags a {
   color: #777;
 }
-/* line 197, content/assets/css/style.scss */
+/* line 199, content/assets/css/style.scss */
 body #page #inner-page #content .article .article_date {
   color: #777;
   margin-left: 4px;
 }
-/* line 202, content/assets/css/style.scss */
+/* line 204, content/assets/css/style.scss */
 body #page #inner-page #content .article .body {
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
@@ -265,7 +269,7 @@ body #page #inner-page #content .article .body {
   box-sizing: border-box;
   padding: 34px 20px;
 }
-/* line 211, content/assets/css/style.scss */
+/* line 213, content/assets/css/style.scss */
 body #page #inner-page #sidebox {
   display: inline;
   float: left;
@@ -284,11 +288,11 @@ body #page #inner-page #sidebox {
 * html body #page #inner-page #sidebox {
   overflow-x: hidden;
 }
-/* line 219, content/assets/css/style.scss */
+/* line 221, content/assets/css/style.scss */
 body #page #inner-page #sidebox h2 {
   margin: 20px 0 10px;
 }
-/* line 223, content/assets/css/style.scss */
+/* line 225, content/assets/css/style.scss */
 body #page #inner-page #sidebox UL {
   margin-left: 20px;
 }
