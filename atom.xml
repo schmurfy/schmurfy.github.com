@@ -2,13 +2,182 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <id>http://schmurfy.github.com/</id>
   <title>Chained Experiments</title>
-  <updated>2011-05-06T13:00:00Z</updated>
+  <updated>2011-05-19T20:30:00Z</updated>
   <link rel="alternate" href="http://schmurfy.github.com/"/>
   <link rel="self" href="http://schmurfy.github.com/atom.xml"/>
   <author>
     <name>Julien Ammous</name>
     <uri>http://schmurfy.github.com</uri>
   </author>
+  <entry>
+    <id>tag:schmurfy.github.com,2011-05-19:/2011/05/07/ruby_application_monitoring.html</id>
+    <title type="html">Ruby Application Monitoring</title>
+    <published>2011-05-19T20:30:00Z</published>
+    <updated>2011-05-19T20:30:00Z</updated>
+    <link rel="alternate" href="http://schmurfy.github.com/2011/05/07/ruby_application_monitoring.html"/>
+    <content type="html">&lt;p&gt;When any of your applications starts to really fly by themselves you are bound to reach a
+point where you want/need to know what happen inside it and translate that into graphs
+you can show and monitor to check the health of the system.&lt;/p&gt;
+
+&lt;p&gt;Such a system include many parts that must work together to bring you the data you want
+and/or want to show and that is where I faced my first wall.&lt;/p&gt;
+
+&lt;h2&gt;What are those parts ?&lt;/h2&gt;
+
+&lt;h3&gt;Producer&lt;/h3&gt;
+
+&lt;p&gt;Your applications can produce data you want to store and view immediately or later,
+a general purpose probe can also extract useful metrics from a physical server like
+the cpu usage, the load, memory, etc...&lt;br&gt;&lt;/p&gt;
+
+&lt;h3&gt;Aggregator / Router&lt;/h3&gt;
+
+&lt;p&gt;This node is the one receiving the data and deciding what to do with them, whether
+it will be stored on a local disk in rrd or send on the network to another application
+and whether to use the data as is or to transform them before.&lt;br&gt;&lt;/p&gt;
+
+&lt;h3&gt;Storage Engine&lt;/h3&gt;
+
+&lt;p&gt;I decided to separate this one but most of the time it will be a subpart of the
+Aggregator / Router. The storage will determine how and where your data will be
+stored, most of the time it will be rrd since it works and there are not real
+alternatives out there.&lt;br&gt;
+While the rrd format itself is nice I am not really too fond of the rrd library
+itself, the api is really ugly and always force me to do things I do not want
+to do whenever I need to work with it.&lt;/p&gt;
+
+&lt;h3&gt;Graph drawer&lt;/h3&gt;
+
+&lt;p&gt;That is the last part and will surely be the most important since whatever
+energy/dedication you put in setting up the other parts it is that one anyone
+will face and that is also one of my biggest problem...&lt;/p&gt;
+
+&lt;h2&gt;Choosing the right parts&lt;/h2&gt;
+
+&lt;p&gt;There are some beast out there that are heavily used when you start speaking about monitoring
+you are nearly forced to hit them (or get it by them), the name I hear the most are:
+Nagios, Munin, Cacti, MRTG, SmokePing.&lt;/p&gt;
+
+&lt;p&gt;There a multiple problems for me with those systems, the first one is that some
+are more or less focused on a specific need (like SmokePing) and making them play
+together can be really "fun", the kind of fun nobody wants.&lt;br&gt;
+The other problem I faced is that they tend to want control over the whole monitoring system,
+they want you to use their producers module, their graph drawer, their router and if
+you want to step aside and change one part your are doomed.&lt;br&gt;
+It may have changed since last time I did a check but I highly doubt it.&lt;/p&gt;
+
+&lt;p&gt;I worked with some of those in the past but never really liked them so when I
+faced again the need to collect metrics from different applications/languages
+as well as server's metrics I tried to find something else.&lt;/p&gt;
+
+&lt;h3&gt;The SmokePing case&lt;/h3&gt;
+
+&lt;p&gt;Before I started working on a monitoring solution for a work project I am currently
+on there was previously SmokePing set up, I may be heavily biased on it
+because of my first impression but what first impression it made !&lt;/p&gt;
+
+&lt;p&gt;The first things I noticed when looking at it was that the server part was slow as hell
+and was taking a more than noticeable part of the cpu (I honestly do not
+remember how much but it was certainly not invisible on the machine speaking
+of resources) so I checked its producer counterpart which is on an embedded system
+(Soekris hardware) and here too the daemon was not invisible at all !&lt;/p&gt;
+
+&lt;p&gt;The last thing that crushed that beast for me is that loading a page with graphs on
+it was slow too and caused cpu spikes, perfect !&lt;/p&gt;
+
+&lt;p&gt;It is perfectly possible that smokeping was badly installed and would work
+far better in normal conditions (that said I am not too sure about the producer part)
+but seriously what can you do with such bright first impression ?&lt;/p&gt;
+
+&lt;h3&gt;Enter Collectd&lt;/h3&gt;
+
+&lt;p&gt;While looking for a decent Aggregator I came upon collectd which I never saw
+before and does a really great job at dispatching metrics.&lt;/p&gt;
+
+&lt;p&gt;Collectd is a modular application with modules falling in two categories:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;readers: these plugins receive data from somewhere or extract it (ex: 
+network, shell command, /proc file, etc...)&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;writers: these plugins will output the data somewhere (ex: network again,
+rrdtool, rrdcached, database, etc...)&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;p&gt;Collectd do a really nice job but some parts are hard to use and not really
+designed for usability, the best example I have is the filter system,
+Collectd comes with a really powerful filter subsystem which lets you
+update/add/delete fields of the collectd "messages" or the whole messages.&lt;/p&gt;
+
+&lt;p&gt;Sadly this filter subsystem has one of the worst configuration interface
+I have seen until now, see for yourself (and this one is a simple one):&lt;/p&gt;
+
+&lt;pre&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nt"&gt;&amp;lt;Rule&lt;/span&gt; &lt;span class="s"&gt;"ping_server1"&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+  &lt;span class="nt"&gt;&amp;lt;Match&lt;/span&gt; &lt;span class="s"&gt;"regex"&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="nb"&gt;Plugin&lt;/span&gt; &lt;span class="s2"&gt;"^ping$"&lt;/span&gt;
+    &lt;span class="nb"&gt;TypeInstance&lt;/span&gt; &lt;span class="s2"&gt;"^1.2.3.4$"&lt;/span&gt;
+  &lt;span class="nt"&gt;&amp;lt;/Match&amp;gt;&lt;/span&gt;
+  &lt;span class="nt"&gt;&amp;lt;Target&lt;/span&gt; &lt;span class="s"&gt;"replace"&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class="nb"&gt;TypeInstance&lt;/span&gt; &lt;span class="s2"&gt;"1.2.3.4"&lt;/span&gt; &lt;span class="s2"&gt;"server1"&lt;/span&gt;
+  &lt;span class="nt"&gt;&amp;lt;/Target&amp;gt;&lt;/span&gt;
+&lt;span class="nt"&gt;&amp;lt;/Rule&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/pre&gt;
+
+&lt;p&gt;This one is pretty straight forward but all this text is just to
+replace a string with another...&lt;/p&gt;
+
+&lt;p&gt;In another language this could become:&lt;/p&gt;
+
+&lt;pre&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="nb"&gt;p&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;type_instance&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="s2"&gt;"1.2.3.4"&lt;/span&gt;
+  &lt;span class="nb"&gt;p&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;type_instance&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;"server1"&lt;/span&gt;
+&lt;span class="k"&gt;end&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/pre&gt;
+
+&lt;p&gt;Just imagine what a complex flow would look with the xml like
+syntax :/&lt;/p&gt;
+
+&lt;p&gt;While I have some issues with collectd I am currently using it on
+production servers as well as embedded systems and it works well.&lt;/p&gt;
+
+&lt;h3&gt;The producers&lt;/h3&gt;
+
+&lt;p&gt;Sending your own counters to collectd is not really hard, the network
+plugin of collectd use a clearly defined and simple binary format served
+over UDP and many libraries exist out there for different languages to
+generate those packets and send them to collectd.&lt;/p&gt;
+
+&lt;h3&gt;Serving graphs&lt;/h3&gt;
+
+&lt;p&gt;The only part left is the user interface used to navigate and generate
+the graphs from all these data we collected and that is where the real
+problem arise... Since many existing systems want control over the
+whole data collection chains you cannot easily integrate data from
+somewhere else.&lt;/p&gt;
+
+&lt;p&gt;My quest was to find a tool doing a really simple thing (at least
+I thought it was): draw graphs from rrd file and serve them to the
+clients while staying nearly invisible on the server resource wise.&lt;/p&gt;
+
+&lt;p&gt;Do you know one ? Because I could really use some names here.&lt;/p&gt;
+
+&lt;p&gt;I ended up coding my own modest graph drawer but that is just a small
+part of what I need. WHat I have now is a sinatra application
+which uses the client itself to compute the graphs with some
+javascript around the excellent jquery library: &lt;a href="http://code.google.com/p/flot/"&gt;flot&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Since the clients are drawing the graphs the server is really
+not doing much, only extracting data from the rrd and formatting
+them in json which is really nice.&lt;/p&gt;
+
+&lt;h2&gt;Current State&lt;/h2&gt;
+
+&lt;p&gt;I have a working stack for now, I am not completly happy with it
+but at least I have control over the parts and except for the grapher
+I am just using existing application/library so I did not have
+to write any code.&lt;/p&gt;
+
+&lt;p&gt;I am still searching for a better solutions and working on some
+projects which may help but that will be for another time :)&lt;/p&gt;</content>
+  </entry>
   <entry>
     <id>tag:schmurfy.github.com,2011-05-06:/2011/05/06/create_your_github_user_page_with_nanoc.html</id>
     <title type="html">Create your Github user page with nanoc</title>
