@@ -3,7 +3,7 @@
 <head>
 <title>Chained Experiments</title>
 <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
-<meta content='sinatra, ruby, nginx, redis, nanoc, nanoc3, github, blog, monitoring, metrics, collectd' name='keywords'>
+<meta content='sinatra, ruby, nginx, redis, nanoc, nanoc3, github, blog, monitoring, metrics, collectd, Erlang' name='keywords'>
 <link href='/assets/css/pygment.css' media='screen' rel='stylesheet' type='text/css'>
 <link href='/assets/css/style.css' media='screen' rel='stylesheet' type='text/css'>
 <script src='/assets/js/jquery-1.6.min.js' type='text/javascript'></script>
@@ -41,6 +41,176 @@
 </h1>
 </div>
 <div id='content'>
+<div class="article">
+<div class="article_date date" title="2011-06-04T12:00:00Z">Jun 04, 2011</div>
+<h1 class="title">
+<a href="/2011/06/04/doing_things_differently_erlang.html">Doing things differently: Erlang</a>
+</h1>
+<div class="tags"><a href="/tags/erlang/" class="tag">Erlang</a></div>
+<div class="body">
+<p>Since I discovered RabbitMQ I kept an eye on Erlang but never looked past what is at first look an
+horrible syntax.
+I recently watched some presentations and read more about it to the point where I decided to take a
+dive: I started reading tutorials and even bought two books, with that I was ready to start.</p>
+
+<p>I was never a fan of writing useless test applications which will end up in the trash right when you
+finish it, what I do instead is that I always have a folder full of what would be best described
+as small tests and the way I use this is every time I am not 100% sure of how to do something or
+I do not know how to do it at all I start a new file (or reopen an existing one) and start a
+minimal application which is usually 5 to 10 lines.</p>
+
+<p>I do this in ruby a lot and the nature of the language itself really makes it easy, see for yourself:</p>
+
+<ul>
+<li>create a new document in textmate (Apple + N)</li>
+<li>write code</li>
+<li>run it (Apple + R)</li>
+</ul>
+<p>While it is a little harder in Erlang I still use the same process which do wonders for me.</p>
+
+<p>So, aside from these tests I still needed a real project to work on, luckily I had one in stock:
+I wanted to build a monitoring server similar to what collectd does but I wanted to try a different
+approach and I kept this ideas for months since I had troubles deciding which language I wanted
+to write it in.<br>
+I will not speak about this application here but the project is already started and the basic
+parts are working (the project is on my github account and is named collector if you want to
+check it out).</p>
+
+<p>The goal here is not to make another tutorial, there are enough already on the web, what I will
+do now is give you an overview of erlang features and you knowns, maybe makes you want to
+know more about it.</p>
+
+<p>The way Erlang is built is really different from what I used until now, the main difference is obviously
+the language itself but there are concepts built into Erlang which are too a great change, the syntax
+is similar to prolog and knowing prolog surely helped me understand the erlang syntax faster.</p>
+
+<p>We will now see some of the specific features of Erlang.</p>
+
+<h2>Processes</h2>
+
+<p>In Erlang everything is run in what is called a process, this was really disturbing at first because
+the "process" term in Erlang have really nothing to do with system processes and unlike them you can
+have thousands or even millions of Erlang processes running judging by some articles/presentations I saw.<br>
+I did not dug that too much but Erlang process seems to be code blocks distributed on a poll of threads.</p>
+
+<p>You use them like you would use threads in C/Java/Ruby except they are not threads.</p>
+
+<h2>Actor model</h2>
+
+<p>Each Erlang process has only one way to communicate with the others (that is not entirely true but
+let's assume it is for now) and that is by passing a message to another process.<br>
+That is a powerful model which is part of the language, I will speak more about it later.</p>
+
+<h2>Virtual Machine</h2>
+
+<p>That is the first time I see what we call a virtual machine looks like an actual virtual machine !
+In Erlang your can run more than one application on a given vm or even connect to it to run
+commands on a live system.</p>
+
+<p>Each running vm is called a node, you can connect multiple nodes to create a network which nearly acts
+like a single computer making concurrent programming part of the language (both for multiple cpu cores
+and multiple machines) and not something you have to specifically think about.</p>
+
+<h2>Immutability</h2>
+
+<p>That is another disturbing things when you first try to understand the language: once a "variable"
+(they are not really variable since they cannot change) is assigned a value you cannot assign
+another value to it. This really looks like a limitation at first but when used with pattern
+matching it is in fact really powerful.</p>
+
+<pre><div class="highlight"><pre><span class="nf">fail</span><span class="p">()</span> <span class="o">-&gt;</span>&#x000A;  <span class="nv">A</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>&#x000A;  <span class="nv">A</span> <span class="o">=</span> <span class="nv">A</span> <span class="o">+</span> <span class="mi">4</span><span class="p">.</span> <span class="c">% error !</span>&#x000A;&#x000A;<span class="nf">work</span><span class="p">()</span> <span class="o">-&gt;</span>&#x000A;  <span class="nv">A</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>&#x000A;  <span class="nv">B</span> <span class="o">=</span> <span class="nv">A</span> <span class="o">+</span> <span class="mi">4</span><span class="p">.</span> <span class="c">% it works</span></pre></div>
+</pre>
+
+<h2>Pattern matching</h2>
+
+<p>It is quite hard to wrap your mind around this one when not used to it but once you start
+understanding it you can really appreciates it.</p>
+
+<pre><div class="highlight"><pre><span class="nf">connect</span><span class="p">(</span><span class="nv">A</span><span class="p">)</span> <span class="o">-&gt;</span>&#x000A;  <span class="p">{</span><span class="n">ok</span><span class="p">,</span> <span class="nv">Result</span><span class="p">}</span> <span class="o">=</span> <span class="nn">mod</span><span class="p">:</span><span class="n">do_something</span><span class="p">(</span><span class="nv">A</span><span class="p">),</span>&#x000A;  <span class="nv">Result</span> <span class="o">+</span> <span class="mi">2</span><span class="p">.</span></pre></div>
+</pre>
+
+<p>This piece of code looks pretty simple but what happens behind is that the function do_something
+has to return a tuple (similar to a list but used to group things together, sort of a C structure
+or an object) and the first element has to be "ok" (which is an atom here, they are similar to the ruby
+symbols).</p>
+
+<p>This means that if the function does not return a tuple or if the tuple returned does not has
+ok as its first value this code will raise an error and crash.</p>
+
+<p>As A C/Java/Ruby developer it is frightening when you realize that the process can crash anywhere
+and our reflex would be to test if an error occurred but this is not how it works in Erlang
+(C is especially horrible with the requirement to test the return
+value of EACH function you call which is a huge waste of time).</p>
+
+<h2>Error Handling strategy</h2>
+
+<p>In Erlang all your work is separated in processes, as we saw there may be a lot of them each
+doing their work and optionally dying when finished, this is how you create a process in Erlang:</p>
+
+<pre><div class="highlight"><pre><span class="nf">start</span><span class="p">()</span> <span class="o">-&gt;</span>&#x000A;  <span class="nb">spawn</span><span class="p">(</span><span class="n">func</span><span class="p">()</span> <span class="o">-&gt;</span>&#x000A;    <span class="n">do_something</span><span class="p">()</span>&#x000A;  <span class="k">end</span><span class="p">).</span></pre></div>
+</pre>
+
+<p>In the previous code the function do_something() will be executed in a separate process from
+the start function and the start function will end. But there is another way to start a process !<br>
+If instead of using spawn you use spawn_link the process you create will be linked to the current one
+and if an error occurs in the spawned process a message will be sent to this process telling it
+that the process exited with the reason as an argument (which may just be that it finished its work but it may
+also be that an error occured).</p>
+
+<p>The way you handle errors in erlang is exactly that, instead of trying to handle everything
+that could go wrong with your code you just write for the better and separate your code in
+different logical parts, then you add a supervisor which is simply a process monitoring the other
+processes and which will restart them on error (if you ask it to).</p>
+
+<p>That is something I really do appreciate, each time I write C code it really makes me sad
+having to test everything... Not only it slows me down when writing code but it create
+a huge amount of code when in fact your code do not do that much.</p>
+
+<p>Let's take a real world use case: You want to build a TCP Server, here is what you might write
+in C<br>
+(there is more function calls in C but that is not the point here):</p>
+
+<pre><div class="highlight"><pre><span class="kt">void</span> <span class="nf">start</span><span class="p">(</span> <span class="kt">int</span> <span class="n">port</span> <span class="p">)</span>&#x000A;<span class="p">{</span>&#x000A;  <span class="kt">int</span> <span class="n">s</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">client</span><span class="p">;</span>&#x000A;&#x000A;  <span class="n">s</span> <span class="o">=</span> <span class="n">socket</span><span class="p">(...);</span>&#x000A;  <span class="k">if</span><span class="p">(</span> <span class="n">s</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="p">){</span>&#x000A;    <span class="n">l</span> <span class="o">=</span> <span class="n">listen</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="mi">5</span><span class="p">);</span>&#x000A;    <span class="k">if</span><span class="p">(</span> <span class="n">l</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">){</span>&#x000A;      <span class="n">client</span> <span class="o">=</span> <span class="n">accept</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="p">...);</span>&#x000A;      <span class="k">if</span><span class="p">(</span> <span class="n">client</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="p">){</span>&#x000A;        <span class="n">send</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="s">"Hello !"</span><span class="p">);</span>&#x000A;      <span class="p">}</span>&#x000A;      <span class="k">else</span> <span class="p">{</span>&#x000A;        <span class="c1">// handle error</span>&#x000A;      <span class="p">}</span>&#x000A;    <span class="p">}</span>&#x000A;    <span class="k">else</span> <span class="p">{</span>&#x000A;      <span class="c1">// handle the error</span>&#x000A;    <span class="p">}</span>&#x000A;  <span class="p">}</span>&#x000A;  <span class="k">else</span> <span class="p">{</span>&#x000A;    <span class="c1">// handle the error</span>&#x000A;  <span class="p">}</span>&#x000A;<span class="p">}</span></pre></div>
+</pre>
+
+<p>And in Erlang:</p>
+
+<pre><div class="highlight"><pre><span class="nf">start</span><span class="p">(</span><span class="nv">Port</span><span class="p">)</span> <span class="o">-&gt;</span>&#x000A;  <span class="p">{</span><span class="n">ok</span><span class="p">,</span> <span class="nv">Listen</span><span class="p">}</span> <span class="o">=</span> <span class="nn">gen_tcp</span><span class="p">:</span><span class="n">listen</span><span class="p">(</span><span class="nv">Port</span><span class="p">,</span> <span class="p">[])</span>&#x000A;  <span class="p">{</span><span class="n">ok</span><span class="p">,</span> <span class="nv">Socket</span><span class="p">}</span> <span class="o">=</span> <span class="nn">gen_tcp</span><span class="p">:</span><span class="n">accept</span><span class="p">(</span><span class="nv">Listen</span><span class="p">),</span>&#x000A;  <span class="nn">gen_tcp</span><span class="p">:</span><span class="nb">send</span><span class="p">(</span><span class="nv">Socket</span><span class="p">,</span> <span class="s">"Hello !"</span><span class="p">).</span></pre></div>
+</pre>
+
+<p>In a real application the start function will be ran under a supervisor, if the listen of accept
+call fails the process will die and will be restarted ! Coding this way is really nice, you can
+concentrate on your real goal instead of keeping in mind the worst possible things that could happen.</p>
+
+<p>I do not say you can completely ignore them but I found than when coding this way you can put them
+aside.</p>
+
+<h2>Distributed computing</h2>
+
+<p>The last thing I want to mention is how easy an application can be distributed across cpu cores
+or even physical machines, the vm knowns how to uses all the cpu on the server running it and
+you can link multiple virtual machines together to form a network of nodes (each node being
+an erlang vm running on a different computer) in which a process can be spawned on any node.</p>
+
+<p>Since spawn_link works from a node to another too you can have supervisors monitoring process on
+multiple nodes allowing you to easily failover case where a process is spawned on node2 to replace
+the one on node2 you just lost because the machine is down.</p>
+
+<p>This was just was an overview of the features of this language, if you want to lean more about it
+here is some resources which helped me learning it:</p>
+
+<p><a href="http://www.infoq.com/presentations/joe-armstrong-erlang-qcon08">Presentation from Joe Armstrong, one of Erlang creators</a></p>
+
+<p>The two books I read after finding good reviews about them:<br><a href="http://pragprog.com/titles/jaerlang/programming-erlang">Programming Erlang written by Joe Armstrong</a><br><a href="http://oreilly.com/catalog/9780596518189">Erlang from O'reilly</a></p>
+
+<p>Both books obviously have common parts but the second cover things that were only mentionned in the first one,
+If you should only buy one I consider Programming Erlang.</p>
+
+<p>And lastly here is a nice website with tutorials:<br><a href="http://learnyousomeerlang.com/content">learn you some Erlang</a></p>
+<a data-disqus-identifier="2011/06/04 14:00" href="/2011/06/04/doing_things_differently_erlang.html#disqus_thread">Comments</a>
+</div>
+</div>
+
 <div class="article">
 <div class="article_date date" title="2011-05-19T20:30:00Z">May 19, 2011</div>
 <h1 class="title">
@@ -435,6 +605,9 @@ the transfer speed and it can takes more resources on the server.</li>
 <h2>Recent posts</h2>
 <ul>
 <li>
+<a href='/2011/06/04/doing_things_differently_erlang.html' title='Full article'>Doing things differently: Erlang</a>
+</li>
+<li>
 <a href='/2011/05/07/ruby_application_monitoring.html' title='Full article'>Ruby Application Monitoring</a>
 </li>
 <li>
@@ -451,7 +624,7 @@ the transfer speed and it can takes more resources on the server.</li>
 (3)
 </li>
 <li>
-<a href='/tags/nanoc3/'>nanoc3</a>
+<a href='/tags/github/'>github</a>
 (1)
 </li>
 <li>
@@ -467,11 +640,11 @@ the transfer speed and it can takes more resources on the server.</li>
 (1)
 </li>
 <li>
-<a href='/tags/sinatra/'>sinatra</a>
+<a href='/tags/nanoc3/'>nanoc3</a>
 (1)
 </li>
 <li>
-<a href='/tags/github/'>github</a>
+<a href='/tags/sinatra/'>sinatra</a>
 (1)
 </li>
 <li>
@@ -488,6 +661,10 @@ the transfer speed and it can takes more resources on the server.</li>
 </li>
 <li>
 <a href='/tags/collectd/'>collectd</a>
+(1)
+</li>
+<li>
+<a href='/tags/erlang/'>Erlang</a>
 (1)
 </li>
 </ul>
