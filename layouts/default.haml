@@ -76,3 +76,29 @@
     
     #footer
       Content and Design © Julien Ammous
+    
+    %script{:type => 'text/javascript', :src => 'http://include.reinvigorate.net/re_.js'}
+    %script{:type => 'text/javascript', :src => 'http://static.getclicky.com/js'}
+    :javascript
+      // reinvigorate.com
+      try {
+        reinvigorate.track("a53v7-0774042990");
+      } catch(err) {}
+      
+      // clicky
+      
+      try{
+        clicky.init(66458104);
+      }catch(e){}
+      
+      // Start of Woopra Code
+      var woo_settings = {idle_timeout:'300000', domain:'schmurfy.github.com'};
+      (function(){
+        var wsc = document.createElement('script');
+        wsc.src = document.location.protocol+'//static.woopra.com/js/woopra.js';
+        wsc.type = 'text/javascript';
+        wsc.async = true;
+        var ssc = document.getElementsByTagName('script')[0];
+        ssc.parentNode.insertBefore(wsc, ssc);
+      })();
+      
