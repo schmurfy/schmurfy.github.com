@@ -9,3 +9,7 @@ guard 'nanoc' do
   watch( /^lib\// )
   watch( /^static\// )
 end
+
+guard 'livereload' do
+  watch(%r{output/.+\.(html|css|js)})
+end
