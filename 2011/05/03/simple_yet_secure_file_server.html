@@ -122,7 +122,7 @@ the transfer speed and it can takes more resources on the server.</li>
 
 <p>Now the next part is to send the required headers, here is what a minimal sinatra
   application looks like for doing this:
-</p><div class="highlight"><pre><span class="nb">require</span> <span class="s1">'rubygems'</span>&#x000A;<span class="nb">require</span> <span class="s1">'sinatra'</span>&#x000A;&#x000A;<span class="n">get</span> <span class="s2">"/:token/*"</span> <span class="k">do</span>&#x000A;  <span class="c1"># we use splat here to allow the path to include "/"</span>&#x000A;  <span class="n">path</span> <span class="o">=</span> <span class="n">params</span><span class="o">[</span><span class="ss">:splat</span><span class="o">].</span><span class="n">join</span><span class="p">(</span><span class="s1">'/'</span><span class="p">)</span>&#x000A;  <span class="n">content_type</span> <span class="s1">'application/x-zip'</span>&#x000A;&#x000A;<span class="n">headers</span><span class="p">(</span>&#x000A;      <span class="c1"># Set the filename for the browser, you can force it</span>&#x000A;      <span class="c1"># or just use the original one ( File.basename(path) )</span>&#x000A;      <span class="s2">"Content-Disposition"</span> <span class="o">=&gt;</span> <span class="s2">"attachment; filename="</span><span class="n">file</span><span class="o">.</span><span class="n">txt</span><span class="s2">""</span><span class="p">,</span>&#x000A;&#x000A;  <span class="c1"># and ask nginx to send this file to the client</span>&#x000A;  <span class="s2">"X-Accel-Redirect"</span> <span class="o">=&gt;</span> <span class="s2">"/data/</span><span class="si">#{</span><span class="n">path</span><span class="si">}</span><span class="s2">"</span>&#x000A;<span class="p">)</span>&#x000A;&#x000A;&#x000A;<span class="c1"># finally return an empty body</span>&#x000A;  <span class="k">return</span> <span class="s2">""</span>&#x000A;<span class="k">end</span></pre></div>
+</p><div class="highlight"><pre><span class="nb">require</span> <span class="s1">'rubygems'</span>&#x000A;<span class="nb">require</span> <span class="s1">'sinatra'</span>&#x000A;&#x000A;<span class="n">get</span> <span class="s2">"/:token/*"</span> <span class="k">do</span>&#x000A;  <span class="c1"># we use splat here to allow the path to include "/"</span>&#x000A;  <span class="n">path</span> <span class="o">=</span> <span class="n">params</span><span class="o">[</span><span class="ss">:splat</span><span class="o">].</span><span class="n">join</span><span class="p">(</span><span class="s1">'/'</span><span class="p">)</span>&#x000A;  <span class="n">content_type</span> <span class="s1">'application/x-zip'</span>&#x000A;&#x000A;<span class="n">headers</span><span class="p">(</span>&#x000A;      <span class="c1"># Set the filename for the browser, you can force it</span>&#x000A;      <span class="c1"># or just use the original one ( File.basename(path) )</span>&#x000A;      <span class="s2">"Content-Disposition"</span> <span class="o">=&gt;</span> <span class="s2">"attachment; filename=</span><span class="se">\"</span><span class="s2">file.txt</span><span class="se">\"</span><span class="s2">"</span><span class="p">,</span>&#x000A;&#x000A;  <span class="c1"># and ask nginx to send this file to the client</span>&#x000A;  <span class="s2">"X-Accel-Redirect"</span> <span class="o">=&gt;</span> <span class="s2">"/data/</span><span class="si">#{</span><span class="n">path</span><span class="si">}</span><span class="s2">"</span>&#x000A;<span class="p">)</span>&#x000A;&#x000A;&#x000A;<span class="c1"># finally return an empty body</span>&#x000A;  <span class="k">return</span> <span class="s2">""</span>&#x000A;<span class="k">end</span></pre></div>
 
 
 <p>This is a minimal application, no authentication, no security check.
@@ -198,6 +198,9 @@ the transfer speed and it can takes more resources on the server.</li>
 <h2>Recent posts</h2>
 <ul>
 <li>
+<a href='/2011/08/12/building_rack_middleware_with_sinatra.html' title='Full article'>Building a Rack Middleware with sinatra</a>
+</li>
+<li>
 <a href='/2011/06/04/doing_things_differently_erlang.html' title='Full article'>Doing things differently: Erlang</a>
 </li>
 <li>
@@ -206,22 +209,19 @@ the transfer speed and it can takes more resources on the server.</li>
 <li>
 <a href='/2011/05/06/create_your_github_user_page_with_nanoc.html' title='Full article'>Create your Github user page with nanoc</a>
 </li>
-<li>
-<a href='/2011/05/03/simple_yet_secure_file_server.html' title='Full article'>Simple yet secure file server</a>
-</li>
 </ul>
 <h2>Tags</h2>
 <ul>
 <li>
 <a href='/tags/ruby/'>ruby</a>
-(3)
+(4)
+</li>
+<li>
+<a href='/tags/sinatra/'>sinatra</a>
+(2)
 </li>
 <li>
 <a href='/tags/github/'>github</a>
-(1)
-</li>
-<li>
-<a href='/tags/nginx/'>nginx</a>
 (1)
 </li>
 <li>
@@ -237,7 +237,7 @@ the transfer speed and it can takes more resources on the server.</li>
 (1)
 </li>
 <li>
-<a href='/tags/sinatra/'>sinatra</a>
+<a href='/tags/nginx/'>nginx</a>
 (1)
 </li>
 <li>
@@ -258,6 +258,10 @@ the transfer speed and it can takes more resources on the server.</li>
 </li>
 <li>
 <a href='/tags/erlang/'>Erlang</a>
+(1)
+</li>
+<li>
+<a href='/tags/rack/'>rack</a>
 (1)
 </li>
 </ul>

@@ -2,13 +2,82 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <id>http://schmurfy.github.com/</id>
   <title>Chained Experiments</title>
-  <updated>2011-06-04T12:00:00Z</updated>
+  <updated>2011-08-12T12:00:00Z</updated>
   <link rel="alternate" href="http://schmurfy.github.com/"/>
   <link rel="self" href="http://schmurfy.github.com/atom.xml"/>
   <author>
     <name>Julien Ammous</name>
     <uri>http://schmurfy.github.com</uri>
   </author>
+  <entry>
+    <id>tag:schmurfy.github.com,2011-08-12:/2011/08/12/building_rack_middleware_with_sinatra.html</id>
+    <title type="html">Building a Rack Middleware with sinatra</title>
+    <published>2011-08-12T12:00:00Z</published>
+    <updated>2011-08-12T12:00:00Z</updated>
+    <link rel="alternate" href="http://schmurfy.github.com/2011/08/12/building_rack_middleware_with_sinatra.html"/>
+    <content type="html">&lt;p&gt;I recently had the need to separate some logic from my main web application, after thinking
+about it for a while (months actually) I finally got an illumination: what about rack ?&lt;br&gt;
+After a quick test aside of my project I confirmed that building a rack middleware is really easy
+( even easier that I thought ), this article is a quick tutorial to build a simple middleware.&lt;/p&gt;
+
+&lt;h2&gt;What is rack ?&lt;/h2&gt;
+
+&lt;p&gt;Rack is a library used in the Ruby to standardize the interactions between the different frameworks
+we have and the web server themselves, thanks to Rack we can now build part of an application in
+sinatra, another in rails, etc...&lt;br&gt;
+Rack is a really nice piece of software but I doubt many out there really used it directly,
+I knew it for quite a long time now but never really felt the need to dig in it.&lt;/p&gt;
+
+&lt;p&gt;You can learn more about Rack &lt;a href="http://rack.rubyforge.org/" title="here"&gt;rack&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2&gt;Our middleware&lt;/h2&gt;
+
+&lt;p&gt;The middleware will simply serve an url with sinatra, I consider this simple enough
+to get anyone interested started, based on this you can do nearly anything.&lt;br&gt;
+The middleware will also accept parameters since I had to do some search to found out
+how to do it.&lt;/p&gt;
+
+&lt;pre&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;require&lt;/span&gt; &lt;span class="s1"&gt;'rack'&lt;/span&gt;
+&lt;span class="nb"&gt;require&lt;/span&gt; &lt;span class="s1"&gt;'sinatra/base'&lt;/span&gt;
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;AboutApp&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt; &lt;span class="no"&gt;Sinatra&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="no"&gt;Base&lt;/span&gt;
+  &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;initialize&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;app&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;opts&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="vi"&gt;@name&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;opts&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;delete&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ss"&gt;:name&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="k"&gt;end&lt;/span&gt;
+
+  &lt;span class="n"&gt;get&lt;/span&gt; &lt;span class="s1"&gt;'/about'&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;
+    &lt;span class="s2"&gt;"Hello, my name is &lt;/span&gt;&lt;span class="si"&gt;#{&lt;/span&gt;&lt;span class="vi"&gt;@str&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt; !"&lt;/span&gt;
+  &lt;span class="k"&gt;end&lt;/span&gt;
+&lt;span class="k"&gt;end&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/pre&gt;
+
+&lt;p&gt;And here is a config.ru file showing how to use it:&lt;/p&gt;
+
+&lt;pre&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;require&lt;/span&gt; &lt;span class="s1"&gt;'about_app'&lt;/span&gt;
+
+&lt;span class="c1"&gt;# this class will act as our main application&lt;/span&gt;
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;MyApp&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt; &lt;span class="no"&gt;Sinatra&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="no"&gt;Base&lt;/span&gt;
+  &lt;span class="n"&gt;get&lt;/span&gt; &lt;span class="s1"&gt;'/test'&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;
+    &lt;span class="s2"&gt;"Test it yourself !"&lt;/span&gt;
+  &lt;span class="k"&gt;end&lt;/span&gt;
+&lt;span class="k"&gt;end&lt;/span&gt;
+
+
+&lt;span class="n"&gt;use&lt;/span&gt; &lt;span class="no"&gt;AboutApp&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="ss"&gt;:name&lt;/span&gt; &lt;span class="o"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="s2"&gt;"Julien"&lt;/span&gt;
+&lt;span class="n"&gt;run&lt;/span&gt; &lt;span class="no"&gt;MyApp&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/pre&gt;
+
+&lt;p&gt;And that is really all you need, now you can run your application with any rack compliant
+web server which basically means you can run it on every web server supporting ruby ;)&lt;/p&gt;
+
+&lt;p&gt;For example:&lt;/p&gt;
+
+&lt;pre&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nv"&gt;$ &lt;/span&gt;unicorn
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/pre&gt;</content>
+  </entry>
   <entry>
     <id>tag:schmurfy.github.com,2011-06-04:/2011/06/04/doing_things_differently_erlang.html</id>
     <title type="html">Doing things differently: Erlang</title>
@@ -598,7 +667,7 @@ the transfer speed and it can takes more resources on the server.&lt;/li&gt;
 &lt;span class="n"&gt;headers&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
       &lt;span class="c1"&gt;# Set the filename for the browser, you can force it&lt;/span&gt;
       &lt;span class="c1"&gt;# or just use the original one ( File.basename(path) )&lt;/span&gt;
-      &lt;span class="s2"&gt;"Content-Disposition"&lt;/span&gt; &lt;span class="o"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="s2"&gt;"attachment; filename="&lt;/span&gt;&lt;span class="n"&gt;file&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;txt&lt;/span&gt;&lt;span class="s2"&gt;""&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+      &lt;span class="s2"&gt;"Content-Disposition"&lt;/span&gt; &lt;span class="o"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="s2"&gt;"attachment; filename=&lt;/span&gt;&lt;span class="se"&gt;\"&lt;/span&gt;&lt;span class="s2"&gt;file.txt&lt;/span&gt;&lt;span class="se"&gt;\"&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
 
   &lt;span class="c1"&gt;# and ask nginx to send this file to the client&lt;/span&gt;
   &lt;span class="s2"&gt;"X-Accel-Redirect"&lt;/span&gt; &lt;span class="o"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="s2"&gt;"/data/&lt;/span&gt;&lt;span class="si"&gt;#{&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;

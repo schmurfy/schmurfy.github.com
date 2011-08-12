@@ -3,7 +3,7 @@
 <head>
 <title>Chained Experiments</title>
 <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
-<meta content='sinatra, ruby, nginx, redis, nanoc, nanoc3, github, blog, monitoring, metrics, collectd, Erlang' name='keywords'>
+<meta content='sinatra, ruby, nginx, redis, nanoc, nanoc3, github, blog, monitoring, metrics, collectd, Erlang, rack' name='keywords'>
 <link href='/assets/css/pygment.css' media='screen' rel='stylesheet' type='text/css'>
 <link href='/assets/css/style.css' media='screen' rel='stylesheet' type='text/css'>
 <script src='/assets/js/jquery-1.6.min.js' type='text/javascript'></script>
@@ -41,6 +41,56 @@
 </h1>
 </div>
 <div id='content'>
+<div class="article">
+<div class="article_date date" title="2011-08-12T12:00:00Z">Aug 12, 2011</div>
+<h1 class="title">
+<a href="/2011/08/12/building_rack_middleware_with_sinatra.html">Building a Rack Middleware with sinatra</a>
+</h1>
+<div class="tags">
+<a href="/tags/rack/" class="tag">rack</a>, <a href="/tags/ruby/" class="tag">ruby</a>, <a href="/tags/sinatra/" class="tag">sinatra</a>
+</div>
+<div class="body">
+<p>I recently had the need to separate some logic from my main web application, after thinking
+about it for a while (months actually) I finally got an illumination: what about rack ?<br>
+After a quick test aside of my project I confirmed that building a rack middleware is really easy
+( even easier that I thought ), this article is a quick tutorial to build a simple middleware.</p>
+
+<h2>What is rack ?</h2>
+
+<p>Rack is a library used in the Ruby to standardize the interactions between the different frameworks
+we have and the web server themselves, thanks to Rack we can now build part of an application in
+sinatra, another in rails, etc...<br>
+Rack is a really nice piece of software but I doubt many out there really used it directly,
+I knew it for quite a long time now but never really felt the need to dig in it.</p>
+
+<p>You can learn more about Rack <a href="http://rack.rubyforge.org/" title="here">rack</a></p>
+
+<h2>Our middleware</h2>
+
+<p>The middleware will simply serve an url with sinatra, I consider this simple enough
+to get anyone interested started, based on this you can do nearly anything.<br>
+The middleware will also accept parameters since I had to do some search to found out
+how to do it.</p>
+
+<pre><div class="highlight"><pre><span class="nb">require</span> <span class="s1">'rack'</span>&#x000A;<span class="nb">require</span> <span class="s1">'sinatra/base'</span>&#x000A;&#x000A;<span class="k">class</span> <span class="nc">AboutApp</span> <span class="o">&lt;</span> <span class="no">Sinatra</span><span class="o">::</span><span class="no">Base</span>&#x000A;  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">opts</span><span class="p">)</span>&#x000A;    <span class="vi">@name</span> <span class="o">=</span> <span class="n">opts</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="ss">:name</span><span class="p">)</span>&#x000A;  <span class="k">end</span>&#x000A;&#x000A;  <span class="n">get</span> <span class="s1">'/about'</span> <span class="k">do</span>&#x000A;    <span class="s2">"Hello, my name is </span><span class="si">#{</span><span class="vi">@str</span><span class="si">}</span><span class="s2"> !"</span>&#x000A;  <span class="k">end</span>&#x000A;<span class="k">end</span></pre></div>
+</pre>
+
+<p>And here is a config.ru file showing how to use it:</p>
+
+<pre><div class="highlight"><pre><span class="nb">require</span> <span class="s1">'about_app'</span>&#x000A;&#x000A;<span class="c1"># this class will act as our main application</span>&#x000A;<span class="k">class</span> <span class="nc">MyApp</span> <span class="o">&lt;</span> <span class="no">Sinatra</span><span class="o">::</span><span class="no">Base</span>&#x000A;  <span class="n">get</span> <span class="s1">'/test'</span> <span class="k">do</span>&#x000A;    <span class="s2">"Test it yourself !"</span>&#x000A;  <span class="k">end</span>&#x000A;<span class="k">end</span>&#x000A;&#x000A;&#x000A;<span class="n">use</span> <span class="no">AboutApp</span><span class="p">,</span> <span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s2">"Julien"</span>&#x000A;<span class="n">run</span> <span class="no">MyApp</span></pre></div>
+</pre>
+
+<p>And that is really all you need, now you can run your application with any rack compliant
+web server which basically means you can run it on every web server supporting ruby ;)</p>
+
+<p>For example:</p>
+
+<pre><div class="highlight"><pre><span class="nv">$ </span>unicorn</pre></div>
+</pre>
+<a data-disqus-identifier="2011/08/12 14:00" href="/2011/08/12/building_rack_middleware_with_sinatra.html#disqus_thread">Comments</a>
+</div>
+</div>
+
 <div class="article">
 <div class="article_date date" title="2011-06-04T12:00:00Z">Jun 04, 2011</div>
 <h1 class="title">
@@ -463,130 +513,6 @@ when rebuilding the site, it justs overwrite existing files.</p>
 <a data-disqus-identifier="2011/05/06 15:00" href="/2011/05/06/create_your_github_user_page_with_nanoc.html#disqus_thread">Comments</a>
 </div>
 </div>
-
-<div class="article">
-<div class="article_date date" title="2011-05-03T20:00:00Z">May 03, 2011</div>
-<h1 class="title">
-<a href="/2011/05/03/simple_yet_secure_file_server.html">Simple yet secure file server</a>
-</h1>
-<div class="tags">
-<a href="/tags/nginx/" class="tag">nginx</a>, <a href="/tags/redis/" class="tag">redis</a>, <a href="/tags/ruby/" class="tag">ruby</a>, <a href="/tags/sinatra/" class="tag">sinatra</a>
-</div>
-<div class="body">
-<p>This is a problem I faced many times but did not had the opportunity to find a good approach to the problem,
-recently I faced it once again and found what i consider a really nice way to implement it efficiently and securely.</p>
-
-<h2>The problem</h2>
-
-<p>The problem is quite simple to describe: how can you serve a file to a given client without allowing it full
-access to the repository, and serves it fast and efficiently resources wise.</p>
-
-<h2>My environment</h2>
-
-<p>Here are some background on my environment to better understand why I did things that way: The application I work
-on is already made of multiple distinct ruby servers/daemons speaking to each other using an in house network protocol,
-aside of those I already have a redis server used mostly for caching data.</p>
-
-<h2>Let's get to work !</h2>
-
-<p>Among time I tried different solutions to this problem:</p>
-
-<h3>The worst method</h3>
-
-<p>You set up a webserver to serve a defined folder where all your files are
-  and your disable the autoindex feature.</p>
-
-<p>The problems are:</p>
-
-<ul>
-<li>if someone have he link it can download again the file whenever he wants
-(it may or may not be a problem depending on your usage)</li>
-<li>a client with the link can pass it to anyone to download the file</li>
-<li>a client may guess another file's path and download it</li>
-</ul>
-<p>The last time I used this method the filenames were alphanumeric strings
-  of 32 characters, this at least reduce the guessing risk to nearly zero</p>
-
-<h3>The second, slightly better</h3>
-
-<p>We now have a web application (php, ruby, perl, etc...) which serves the pages
-  to the clients, the files are stored on the disk outside the webserver root and so, are not
-  accessible directly by clients.</p>
-
-<p>The application authenticate the client (how it is done is irrelevant here) and then the
-  application sends the file's content itself to the client.</p>
-
-<p>The problems:</p>
-
-<ul>
-<li>You monopolize one instance of your application for this task (it is
-especially a problem with ruby on rails)</li>
-<li>chances are that streaming the file through your application will slow down
-the transfer speed and it can takes more resources on the server.</li>
-</ul>
-<p>At least with this approach a client can no longer access a file we don't want him
-  to download and even if he manages to guess another file's name he will just be rejected.</p>
-
-<p>Clients can still exchanges login/pass but that's another story, let's consider that our
-  clients here do not share passwords.</p>
-
-<h3>Now we talk</h3>
-
-<p>I know this is not a terribly big news but apache have support for sending files directly
-  to a client when asked by an application running below it, when an application returns
-  an header "X-Sendfile" pointing to an absolute path on the webserver disk then this file
-  will be streamed by apache to the client.</p>
-
-<p>Nginx has a similar feature but it works differently, here is an example config file:</p>
-
-<div class="highlight"><pre><span class="k">server</span> <span class="p">{</span>&#x000A;  <span class="kn">listen</span> <span class="mi">3000</span><span class="p">;</span>&#x000A;&#x000A;  <span class="kn">location</span> <span class="s">/</span> <span class="p">{</span>&#x000A;    <span class="kn">root</span> <span class="s">'[...]/public'</span><span class="p">;</span>&#x000A;&#x000A;    <span class="kn">passenger_enabled</span> <span class="no">on</span><span class="p">;</span>&#x000A;    <span class="kn">passenger_min_instances</span> <span class="mi">1</span><span class="p">;</span>&#x000A;  <span class="p">}</span>&#x000A;&#x000A;  <span class="kn">location</span> <span class="s">"/data"</span> <span class="p">{</span>&#x000A;    <span class="kn">internal</span><span class="p">;</span>&#x000A;    <span class="kn">root</span> <span class="s">"/path/to/data"</span><span class="p">;</span>&#x000A;  <span class="p">}</span>&#x000A;<span class="p">}</span></pre></div>
-
-  
-
-<p>We have a sinatra application running under passenger on port 3000 and we declare
-  an internal location where our files are, the /data path will not be accessible
-  for web clients.</p>
-
-<p>Now the next part is to send the required headers, here is what a minimal sinatra
-  application looks like for doing this:
-</p>
-<div class="highlight"><pre><span class="nb">require</span> <span class="s1">'rubygems'</span>&#x000A;<span class="nb">require</span> <span class="s1">'sinatra'</span>&#x000A;&#x000A;<span class="n">get</span> <span class="s2">"/:token/*"</span> <span class="k">do</span>&#x000A;  <span class="c1"># we use splat here to allow the path to include "/"</span>&#x000A;  <span class="n">path</span> <span class="o">=</span> <span class="n">params</span><span class="o">[</span><span class="ss">:splat</span><span class="o">].</span><span class="n">join</span><span class="p">(</span><span class="s1">'/'</span><span class="p">)</span>&#x000A;  <span class="n">content_type</span> <span class="s1">'application/x-zip'</span>&#x000A;&#x000A;<span class="n">headers</span><span class="p">(</span>&#x000A;      <span class="c1"># Set the filename for the browser, you can force it</span>&#x000A;      <span class="c1"># or just use the original one ( File.basename(path) )</span>&#x000A;      <span class="s2">"Content-Disposition"</span> <span class="o">=&gt;</span> <span class="s2">"attachment; filename="</span><span class="n">file</span><span class="o">.</span><span class="n">txt</span><span class="s2">""</span><span class="p">,</span>&#x000A;&#x000A;  <span class="c1"># and ask nginx to send this file to the client</span>&#x000A;  <span class="s2">"X-Accel-Redirect"</span> <span class="o">=&gt;</span> <span class="s2">"/data/</span><span class="si">#{</span><span class="n">path</span><span class="si">}</span><span class="s2">"</span>&#x000A;<span class="p">)</span>&#x000A;&#x000A;&#x000A;<span class="c1"># finally return an empty body</span>&#x000A;  <span class="k">return</span> <span class="s2">""</span>&#x000A;<span class="k">end</span></pre></div>
-
-
-<p>This is a minimal application, no authentication, no security check.
-  Now if we want a full application we need some kind of strategy to ensure the client
-  have access to the file he asked, I did this by using redis:</p>
-
-<p>When a client wants a file he first needs to ask our main application (this is
-  the one he is connected to), this application will respond with a token and a path (
-  the token is saved in the redis database and set to expire in a fixed delay),
-  the client will then ask the file server for this file with the token just received,
-  here is the complete sinatra application:</p>
-
-<div class="highlight"><pre><span class="nb">require</span> <span class="s1">'rubygems'</span>&#x000A;<span class="nb">require</span> <span class="s1">'sinatra'</span>&#x000A;<span class="nb">require</span> <span class="s1">'redis'</span>&#x000A;&#x000A;&#x000A;<span class="n">get</span> <span class="s2">"/:token/*"</span> <span class="k">do</span>&#x000A;  <span class="c1"># Connect to the redis database</span>&#x000A;  <span class="n">redis</span> <span class="o">=</span> <span class="no">Redis</span><span class="o">.</span><span class="n">new</span>&#x000A;  <span class="c1"># check the specified token</span>&#x000A;  <span class="n">allowed_path</span> <span class="o">=</span> <span class="n">redis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"file_download:</span><span class="si">#{</span><span class="n">params</span><span class="o">[</span><span class="ss">:token</span><span class="o">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>&#x000A;  <span class="n">path</span> <span class="o">=</span> <span class="n">params</span><span class="o">[</span><span class="ss">:splat</span><span class="o">].</span><span class="n">join</span><span class="p">(</span><span class="s1">'/'</span><span class="p">)</span>&#x000A;&#x000A;  <span class="c1"># only only passage if the token exists and the path asked</span>&#x000A;  <span class="c1"># is the same as the one associated with the token in redis</span>&#x000A;  <span class="k">if</span> <span class="n">path</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">allowed_path</span> <span class="o">==</span> <span class="n">path</span><span class="p">)</span>&#x000A;    <span class="c1"># set the content type so the browser reacts as expected</span>&#x000A;    <span class="n">content_type</span> <span class="s1">'xxx/yyy'</span>&#x000A;&#x000A;    <span class="n">headers</span><span class="p">(</span>&#x000A;        <span class="s2">"Content-Disposition"</span> <span class="o">=&gt;</span> <span class="sx">%{attachment; filename="file.ext"}</span><span class="p">,</span>&#x000A;        <span class="s2">"X-Accel-Redirect"</span> <span class="o">=&gt;</span> <span class="s2">"/data/</span><span class="si">#{</span><span class="n">path</span><span class="si">}</span><span class="s2">"</span>&#x000A;      <span class="p">)</span>&#x000A;    <span class="k">return</span> <span class="s2">""</span>&#x000A;  <span class="k">else</span>&#x000A;    <span class="c1"># return a 404 if access is refused</span>&#x000A;    <span class="c1"># so the client have no way to tells if access was refused</span>&#x000A;    <span class="c1"># or the file really does not exists</span>&#x000A;    <span class="k">raise</span> <span class="no">Sinatra</span><span class="o">::</span><span class="no">NotFound</span>&#x000A;  <span class="k">end</span>&#x000A;<span class="k">end</span>  </pre></div>
-
-  
-
-<p>Since the keys in redis have an expiration delay the client is only allowed to
-  access the file once and has to make another request to download it again.</p>
-
-<p>The expiration delay can even be really short since the check is done at the
-  start of the download, having a too short delay may cause more problems though
-  if the client need to retry the download for any reason.</p>
-
-<h2>Conclusion</h2>
-
-<p>Thanks to redis (it would also work with any database actually) you can distribute the
-  roles between your applications as you wish and with the configuration shown above any
-  application in your environment could deliver a pass to access a given file allowing
-  them to share a single "file server" and still maintaining tight access control.</p>
-
-<p>Following the same idea we could also register a number of allowed downloads in redis
-  and decrement the counter each time the url is accessed, the atomic nature of redis
-  operations makes this really easy to do.</p>
-<a data-disqus-identifier="2011/05/03 22:00" href="/2011/05/03/simple_yet_secure_file_server.html#disqus_thread">Comments</a>
-</div>
-</div>
 <div class='clear'></div>
 </div>
 <div id='sidebox'>
@@ -605,6 +531,9 @@ the transfer speed and it can takes more resources on the server.</li>
 <h2>Recent posts</h2>
 <ul>
 <li>
+<a href='/2011/08/12/building_rack_middleware_with_sinatra.html' title='Full article'>Building a Rack Middleware with sinatra</a>
+</li>
+<li>
 <a href='/2011/06/04/doing_things_differently_erlang.html' title='Full article'>Doing things differently: Erlang</a>
 </li>
 <li>
@@ -613,22 +542,19 @@ the transfer speed and it can takes more resources on the server.</li>
 <li>
 <a href='/2011/05/06/create_your_github_user_page_with_nanoc.html' title='Full article'>Create your Github user page with nanoc</a>
 </li>
-<li>
-<a href='/2011/05/03/simple_yet_secure_file_server.html' title='Full article'>Simple yet secure file server</a>
-</li>
 </ul>
 <h2>Tags</h2>
 <ul>
 <li>
 <a href='/tags/ruby/'>ruby</a>
-(3)
+(4)
+</li>
+<li>
+<a href='/tags/sinatra/'>sinatra</a>
+(2)
 </li>
 <li>
 <a href='/tags/github/'>github</a>
-(1)
-</li>
-<li>
-<a href='/tags/nginx/'>nginx</a>
 (1)
 </li>
 <li>
@@ -644,7 +570,7 @@ the transfer speed and it can takes more resources on the server.</li>
 (1)
 </li>
 <li>
-<a href='/tags/sinatra/'>sinatra</a>
+<a href='/tags/nginx/'>nginx</a>
 (1)
 </li>
 <li>
@@ -665,6 +591,10 @@ the transfer speed and it can takes more resources on the server.</li>
 </li>
 <li>
 <a href='/tags/erlang/'>Erlang</a>
+(1)
+</li>
+<li>
+<a href='/tags/rack/'>rack</a>
 (1)
 </li>
 </ul>

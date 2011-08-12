@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.google.com/schemas/sitemap/0.84">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>http://schmurfy.github.com/2011/05/03/simple_yet_secure_file_server.html</loc>
     <lastmod>2011-05-06</lastmod>
@@ -14,7 +14,11 @@
   </url>
   <url>
     <loc>http://schmurfy.github.com/2011/06/04/doing_things_differently_erlang.html</loc>
-    <lastmod>2011-06-04</lastmod>
+    <lastmod>2011-08-12</lastmod>
+  </url>
+  <url>
+    <loc>http://schmurfy.github.com/2011/08/12/building_rack_middleware_with_sinatra.html</loc>
+    <lastmod>2011-08-12</lastmod>
   </url>
   <url>
     <loc>http://schmurfy.github.com/</loc>

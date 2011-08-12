@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Building a Rack Middleware with sinatra</title>
+<meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+<meta content=', ruby, sinatra, rack' name='keywords'>
+<link href='/assets/css/pygment.css' media='screen' rel='stylesheet' type='text/css'>
+<link href='/assets/css/style.css' media='screen' rel='stylesheet' type='text/css'>
+<script src='/assets/js/jquery-1.6.min.js' type='text/javascript'></script>
+<script src='/assets/js/humane.js' type='text/javascript'></script>
+<script src='/assets/js/app.js' type='text/javascript'></script>
+<script src='/assets/js/disqus.js' type='text/javascript'></script>
+<link href='http://feeds.feedburner.com/schmurfy' rel='alternate' title='schmurfy.github.com' type='application/atom+xml'>
+<link href='http://fonts.googleapis.com/css?family=Expletus+Sans:700' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Droid+Serif' rel='stylesheet' type='text/css'>
+<script>
+  //<![CDATA[
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-23121021-1']);
+    _gaq.push(['_trackPageview']);
+    
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  //]]>
+</script>
+
+
+</head>
+<body>
+<div id='page'>
+<div id='inner-page'>
+<a class='fork_me' href='http://github.com/schmurfy'>
+<img alt='Fork me on GitHub' src='https://d3nwyuy0nl342s.cloudfront.net/img/e6bef7a091f5f3138b8cd40bc3e114258dd68ddf/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67'>
+</a>
+<div id='header'>
+<h1 class='blog_title'>
+<a href='/'>Chained experiments</a>
+</h1>
+</div>
+<div id='content'>
+<div class='article'>
+<div class='article_date date' title='2011-08-12T12:00:00Z'>Aug 12, 2011</div>
+<h1 class='title'>
+<a href='/2011/08/12/building_rack_middleware_with_sinatra.html'>Building a Rack Middleware with sinatra</a>
+</h1>
+<div class='tags'><a href="/tags/rack/" class="tag">rack</a>, <a href="/tags/ruby/" class="tag">ruby</a>, <a href="/tags/sinatra/" class="tag">sinatra</a></div>
+<div class='body'>
+<p>I recently had the need to separate some logic from my main web application, after thinking
+about it for a while (months actually) I finally got an illumination: what about rack ?<br>
+After a quick test aside of my project I confirmed that building a rack middleware is really easy
+( even easier that I thought ), this article is a quick tutorial to build a simple middleware.</p>
+
+<h2>What is rack ?</h2>
+
+<p>Rack is a library used in the Ruby to standardize the interactions between the different frameworks
+we have and the web server themselves, thanks to Rack we can now build part of an application in
+sinatra, another in rails, etc...<br>
+Rack is a really nice piece of software but I doubt many out there really used it directly,
+I knew it for quite a long time now but never really felt the need to dig in it.</p>
+
+<p>You can learn more about Rack <a href="http://rack.rubyforge.org/" title="here">rack</a></p>
+
+<h2>Our middleware</h2>
+
+<p>The middleware will simply serve an url with sinatra, I consider this simple enough
+to get anyone interested started, based on this you can do nearly anything.<br>
+The middleware will also accept parameters since I had to do some search to found out
+how to do it.</p>
+
+<pre><div class="highlight"><pre><span class="nb">require</span> <span class="s1">'rack'</span>&#x000A;<span class="nb">require</span> <span class="s1">'sinatra/base'</span>&#x000A;&#x000A;<span class="k">class</span> <span class="nc">AboutApp</span> <span class="o">&lt;</span> <span class="no">Sinatra</span><span class="o">::</span><span class="no">Base</span>&#x000A;  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">opts</span><span class="p">)</span>&#x000A;    <span class="vi">@name</span> <span class="o">=</span> <span class="n">opts</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="ss">:name</span><span class="p">)</span>&#x000A;  <span class="k">end</span>&#x000A;&#x000A;  <span class="n">get</span> <span class="s1">'/about'</span> <span class="k">do</span>&#x000A;    <span class="s2">"Hello, my name is </span><span class="si">#{</span><span class="vi">@str</span><span class="si">}</span><span class="s2"> !"</span>&#x000A;  <span class="k">end</span>&#x000A;<span class="k">end</span></pre></div>
+</pre>
+
+<p>And here is a config.ru file showing how to use it:</p>
+
+<pre><div class="highlight"><pre><span class="nb">require</span> <span class="s1">'about_app'</span>&#x000A;&#x000A;<span class="c1"># this class will act as our main application</span>&#x000A;<span class="k">class</span> <span class="nc">MyApp</span> <span class="o">&lt;</span> <span class="no">Sinatra</span><span class="o">::</span><span class="no">Base</span>&#x000A;  <span class="n">get</span> <span class="s1">'/test'</span> <span class="k">do</span>&#x000A;    <span class="s2">"Test it yourself !"</span>&#x000A;  <span class="k">end</span>&#x000A;<span class="k">end</span>&#x000A;&#x000A;&#x000A;<span class="n">use</span> <span class="no">AboutApp</span><span class="p">,</span> <span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s2">"Julien"</span>&#x000A;<span class="n">run</span> <span class="no">MyApp</span></pre></div>
+</pre>
+
+<p>And that is really all you need, now you can run your application with any rack compliant
+web server which basically means you can run it on every web server supporting ruby ;)</p>
+
+<p>For example:</p>
+
+<pre><div class="highlight"><pre><span class="nv">$ </span>unicorn</pre></div>
+</pre>
+<div class='comments'>
+<div id='disqus_thread'></div>
+<script>
+  //<![CDATA[
+    var disqus_shortname = 'chainedexperiments';
+    
+    // The following are highly recommended additional parameters. Remove the slashes in front to use.
+    var disqus_url = 'http://schmurfy.github.com/2011/08/12/building_rack_middleware_with_sinatra.html';
+    var disqus_identifier = '2011/08/12 14:00';
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  //]]>
+</script>
+
+</div>
+
+</div>
+</div>
+
+<div class='clear'></div>
+</div>
+<div id='sidebox'>
+<h2>General</h2>
+<ul>
+<!-- %li -->
+<!-- %a{:href => "/about.html"} About -->
+<li>
+<a href='http://feeds.feedburner.com/schmurfy'>RSS Feed</a>
+</li>
+</ul>
+<!-- %h2 Projects -->
+<!-- %ul -->
+<!-- %li -->
+<!-- %a{:href => "/projects/drone.html"} Drone -->
+<h2>Recent posts</h2>
+<ul>
+<li>
+<a href='/2011/08/12/building_rack_middleware_with_sinatra.html' title='Full article'>Building a Rack Middleware with sinatra</a>
+</li>
+<li>
+<a href='/2011/06/04/doing_things_differently_erlang.html' title='Full article'>Doing things differently: Erlang</a>
+</li>
+<li>
+<a href='/2011/05/07/ruby_application_monitoring.html' title='Full article'>Ruby Application Monitoring</a>
+</li>
+<li>
+<a href='/2011/05/06/create_your_github_user_page_with_nanoc.html' title='Full article'>Create your Github user page with nanoc</a>
+</li>
+</ul>
+<h2>Tags</h2>
+<ul>
+<li>
+<a href='/tags/ruby/'>ruby</a>
+(4)
+</li>
+<li>
+<a href='/tags/sinatra/'>sinatra</a>
+(2)
+</li>
+<li>
+<a href='/tags/github/'>github</a>
+(1)
+</li>
+<li>
+<a href='/tags/redis/'>redis</a>
+(1)
+</li>
+<li>
+<a href='/tags/nanoc/'>nanoc</a>
+(1)
+</li>
+<li>
+<a href='/tags/nanoc3/'>nanoc3</a>
+(1)
+</li>
+<li>
+<a href='/tags/nginx/'>nginx</a>
+(1)
+</li>
+<li>
+<a href='/tags/blog/'>blog</a>
+(1)
+</li>
+<li>
+<a href='/tags/monitoring/'>monitoring</a>
+(1)
+</li>
+<li>
+<a href='/tags/metrics/'>metrics</a>
+(1)
+</li>
+<li>
+<a href='/tags/collectd/'>collectd</a>
+(1)
+</li>
+<li>
+<a href='/tags/erlang/'>Erlang</a>
+(1)
+</li>
+<li>
+<a href='/tags/rack/'>rack</a>
+(1)
+</li>
+</ul>
+<h2>Archives</h2>
+<ul>
+<li>
+<a href='/archives.html'>All</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div id='footer'>
+Content and Design © Julien Ammous
+</div>
+<script src='http://include.reinvigorate.net/re_.js' type='text/javascript'></script>
+<script src='http://static.getclicky.com/js' type='text/javascript'></script>
+<script>
+  //<![CDATA[
+    // reinvigorate.com
+    try {
+      reinvigorate.track("a53v7-0774042990");
+    } catch(err) {}
+    
+    // clicky
+    
+    try{
+      clicky.init(66458104);
+    }catch(e){}
+    
+    // Start of Woopra Code
+    var woo_settings = {idle_timeout:'300000', domain:'schmurfy.github.com'};
+    (function(){
+      var wsc = document.createElement('script');
+      wsc.src = document.location.protocol+'//static.woopra.com/js/woopra.js';
+      wsc.type = 'text/javascript';
+      wsc.async = true;
+      var ssc = document.getElementsByTagName('script')[0];
+      ssc.parentNode.insertBefore(wsc, ssc);
+    })();
+  //]]>
+</script>
+</body>
+</html>
