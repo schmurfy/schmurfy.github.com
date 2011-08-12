@@ -11,7 +11,8 @@ gem "activesupport"
 
 group 'guard' do
   gem 'guard'
-  gem 'guard-nanoc'
+  gem 'guard-nanoc', :git => "git://github.com/schmurfy/guard-nanoc.git"
+  gem 'guard-livereload'
   gem 'rb-fsevent'
   gem 'builder'
   gem 'growl'
