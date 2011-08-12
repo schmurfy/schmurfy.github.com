@@ -185,7 +185,7 @@ def keywords
   else
     tags = @item[:tags].nil? ? '' : @item[:tags].join(', ') 
     keywords = @item[:keywords] || ''
-    [keywords, tags].join(', ')
+    [keywords, tags].flatten.compact.join(', ')
   end
 end
 

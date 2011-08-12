@@ -15,28 +15,22 @@ class Pygment < Nanoc3::Filter
       highlighted_code = io.read
       
       return highlighted_code
-      # doc = Nokogiri::HTML.fragment(highlighted_code)
-      # return doc.xpath('./div[@class="highlight"]/pre').inner_html
     end
   end
   
-  def run(content, params={})    
-    # doc = Hpricot(content)
-    # 
-    # doc.search("pre[@class*='language-']") do |element|
-    #   # Get language
-    #   p element['class']
-    #   match = element['class'].match(/(^| )language-([^ ]+)/)
-    #   next if match.nil?
-    #   language = match[2]
-    #   
-    #   highlighted_code = highlight(element.inner_text, language)
-    #   element.inner_html = highlighted_code
-    # end
-    # 
-    # doc.to_s
-    
+  def run(content, params={})
     doc = Nokogiri::HTML.fragment(content)
+    
+    doc.css('code').each do |element|
+      content = element.inner_text.split("\n")
+      if content[0] =~ /:[a-zA-Z]+/
+        language = content[0][1..-1]
+        
+        highlighted_code = highlight(content[1..-1].join("\n"), language)
+        element.replace(highlighted_code)
+      end
+    end
+    
     doc.css('pre[class*="language-"]').each do |element|
       # Get language
       match = element['class'].match(/(^| )language-([^ ]+)/)

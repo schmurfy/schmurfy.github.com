@@ -5,10 +5,14 @@
   - if article?
     .article_date.date{:title => iso8601_time(item[:created_at]) }= pretty_time(item[:created_at])
   
-  %h1.title= item[:title]
-  
-  - if article? && item[:tags]
-    .tags= tag_list(item)
+  - if article?
+    %h1.title
+      %a{:href => route_path(item)}= item[:title]
+    - if item[:tags]
+      .tags= tag_list(item)
+      
+  - else
+    %h1.title= item[:title]
 
   .body
     != content || partial(item)
