@@ -2,13 +2,336 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <id>http://schmurfy.github.com/</id>
   <title>Chained Experiments</title>
-  <updated>2011-08-12T12:00:00Z</updated>
+  <updated>2011-09-25T09:00:00Z</updated>
   <link rel="alternate" href="http://schmurfy.github.com/"/>
   <link rel="self" href="http://schmurfy.github.com/atom.xml"/>
   <author>
     <name>Julien Ammous</name>
     <uri>http://schmurfy.github.com</uri>
   </author>
+  <entry>
+    <id>tag:schmurfy.github.com,2011-09-25:/2011/09/25/on_fibers_and_threads.html</id>
+    <title type="html">On fibers and threads</title>
+    <published>2011-09-25T09:00:00Z</published>
+    <updated>2011-09-25T09:00:00Z</updated>
+    <link rel="alternate" href="http://schmurfy.github.com/2011/09/25/on_fibers_and_threads.html"/>
+    <content type="html">&lt;p&gt;Now that ruby 1.9 is gaining more attention and more and more people are saying goodbye to ruby 1.8 to
+welcome ruby 1.9.2 (don't even try 1.9.1 the latest patch release does not even work correctly...)
+they rediscover the new concurrency tool 1.9 gave us: the Fiber.&lt;/p&gt;
+
+&lt;p&gt;So what is it all about and why can it be useful ?&lt;/p&gt;
+
+&lt;h2&gt;Threads&lt;/h2&gt;
+
+&lt;p&gt;First let's start with some facts about ruby 1.9 threads:&lt;/p&gt;
+
+&lt;p&gt;Ruby threads are now mapped 1:1 with a native os threads, it may sounds great but not that much
+because of the evil Global Interpreter Lock which guarantee only one thread will ever have the hand
+so no real concurrency (in short the garbage collector was not designed to
+handle multithreading so the GIL allows it to work).&lt;/p&gt;
+
+&lt;p&gt;The problem is that while you not gain real concurrency you still have to deal with the pain
+associated with threads in any language, specifically your thread can be put to sleep anytime
+and another thread will start/continue its job.&lt;/p&gt;
+
+&lt;p&gt;Here is an example of such behavior:&lt;/p&gt;
+
+&lt;pre&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;require&lt;/span&gt; &lt;span class="s1"&gt;'thread'&lt;/span&gt;
+
+&lt;span class="no"&gt;MUTEX&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="no"&gt;Mutex&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;new&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;msg&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;str&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="no"&gt;MUTEX&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;synchronize&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="nb"&gt;puts&lt;/span&gt; &lt;span class="n"&gt;str&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="k"&gt;end&lt;/span&gt;
+
+&lt;span class="n"&gt;th1&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="no"&gt;Thread&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;new&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;
+  &lt;span class="mi"&gt;100&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;times&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;msg&lt;/span&gt; &lt;span class="s2"&gt;"[Thread 1] Tick &lt;/span&gt;&lt;span class="si"&gt;#{&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="k"&gt;end&lt;/span&gt;
+
+
+&lt;span class="n"&gt;th2&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="no"&gt;Thread&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;new&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;
+  &lt;span class="mi"&gt;100&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;times&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;msg&lt;/span&gt; &lt;span class="s2"&gt;"[Thread 2] Tick &lt;/span&gt;&lt;span class="si"&gt;#{&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="k"&gt;end&lt;/span&gt;
+
+
+&lt;span class="n"&gt;th1&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;
+&lt;span class="n"&gt;th2&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/pre&gt;
+
+&lt;p&gt;Just paste this code in a text file an execute it with ruby, what you will see depends on many factors but the sure
+thing is that you will see tangled lines starting with Thread 1 and Thread 2 which means that none of thread did is
+job in one go, here is the result on my computer (I only kept the context changes):&lt;/p&gt;
+
+&lt;pre&gt;&lt;div class="highlight"&gt;&lt;pre&gt;[Thread 1] Tick 0
+[...]
+[Thread 1] Tick 67
+[Thread 2] Tick 0
+[...]
+[Thread 2] Tick 99
+[Thread 1] Tick 70
+[...]
+[Thread 1] Tick 99
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/pre&gt;
+
+&lt;p&gt;This example just use the standard input (and have to use a mutex to keep both threads to write at the same time) but imagine what it can be with concurrent database queries...&lt;/p&gt;
+
+&lt;p&gt;I did not dug really far in ruby sources to see how threads are implemented so this explanation my
+be slightly off but my understanding so far is that a ruby thread is given a fixed amount of time to do its
+work, if in the given amount it is not finished the scheduler suspends it and wakeup another thread
+waiting in the queue, it goes on and on until all threads are done or the program is stopped.&lt;/p&gt;
+
+&lt;h2&gt;Fibers&lt;/h2&gt;
+
+&lt;p&gt;So now that we saw what Threads had to offer let's talk about their counterpart: the Fiber, first
+I want to say I have no idea how fibers are implemented but it does not change the validity of the following.&lt;/p&gt;
+
+&lt;p&gt;You can think of fibers as threads without automatic scheduling, when a fiber is running nothing
+else is, this is a core concept and a really important one indeed but we will talk more about this later,&lt;br&gt;
+let's see an example before that:&lt;/p&gt;
+
+&lt;pre&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;msg&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;str&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="nb"&gt;puts&lt;/span&gt; &lt;span class="n"&gt;str&lt;/span&gt;
+&lt;span class="k"&gt;end&lt;/span&gt;
+
+&lt;span class="n"&gt;fb1&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="no"&gt;Fiber&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;new&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;
+  &lt;span class="mi"&gt;100&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;times&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;msg&lt;/span&gt; &lt;span class="s2"&gt;"[Fiber 1] Tick &lt;/span&gt;&lt;span class="si"&gt;#{&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="k"&gt;end&lt;/span&gt;
+
+&lt;span class="n"&gt;fb2&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="no"&gt;Fiber&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;new&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;
+  &lt;span class="mi"&gt;100&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;times&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;msg&lt;/span&gt; &lt;span class="s2"&gt;"[Fiber 2] Tick &lt;/span&gt;&lt;span class="si"&gt;#{&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="k"&gt;end&lt;/span&gt;
+
+&lt;span class="n"&gt;fb1&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;resume&lt;/span&gt;
+&lt;span class="n"&gt;fb2&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;resume&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/pre&gt;
+
+&lt;p&gt;What I did was just convert the thread example from before to fibers, now the result is really different
+and most importantly does not depends on external factors like threads do, when executing this example
+here is what you will get on any machine:&lt;/p&gt;
+
+&lt;pre&gt;&lt;div class="highlight"&gt;&lt;pre&gt;[Fiber 1] Tick 0
+[...]
+[Fiber 1] Tick 99
+[Fiber 2] Tick 0
+[...]
+[Fiber 2] Tick 99
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/pre&gt;
+
+&lt;p&gt;When we called resume on the first fiber it started its job and completed it, then the next line was
+executed and the second fiber was started and finished its job before the program completed, no
+magic, no random, just what you wrote !&lt;/p&gt;
+
+&lt;p&gt;Now there are things you should know about fibers, the power you have on them comes at a price:&lt;br&gt;
+You need to be sure than none of your fiber will block the whole application, if you are making
+a server doing heavy computation in ruby on each request you can forget fibers as only one client
+will be served at once but if you are working on a server working with I/O typically the network and
+one or more databases then you are good to go (with proper 1.9 drivers).&lt;/p&gt;
+
+&lt;p&gt;There is also some calls to avoid in the standard library, the first to come to mind is "sleep",&lt;br&gt;
+here is an example of the problem with it:&lt;/p&gt;
+
+&lt;pre&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;require&lt;/span&gt; &lt;span class="s1"&gt;'fiber'&lt;/span&gt;
+
+&lt;span class="n"&gt;fb1&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="no"&gt;Fiber&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;new&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;
+  &lt;span class="nb"&gt;puts&lt;/span&gt; &lt;span class="s2"&gt;"[Fiber 1] Started"&lt;/span&gt;
+  &lt;span class="nb"&gt;sleep&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;
+  &lt;span class="nb"&gt;puts&lt;/span&gt; &lt;span class="s2"&gt;"[Fiber 1] Completed"&lt;/span&gt;
+&lt;span class="k"&gt;end&lt;/span&gt;
+
+&lt;span class="n"&gt;fb2&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="no"&gt;Fiber&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;new&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;
+  &lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;times&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="nb"&gt;puts&lt;/span&gt; &lt;span class="s2"&gt;"[Fiber 2] tick &lt;/span&gt;&lt;span class="si"&gt;#{&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="k"&gt;end&lt;/span&gt;
+
+&lt;span class="n"&gt;fb1&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;resume&lt;/span&gt;
+&lt;span class="n"&gt;fb2&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;resume&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/pre&gt;
+
+&lt;p&gt;This program will sleep 2 seconds and then output 10 times a message, we will see in the next section how EventMachine can help us with this specific case, here is the output for this one:&lt;/p&gt;
+
+&lt;pre&gt;&lt;div class="highlight"&gt;&lt;pre&gt;[Fiber 1] Started
+[Fiber 1] Completed
+[Fiber 2] tick 0
+[...]
+[Fiber 2] tick 9
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/pre&gt;
+
+&lt;h2&gt;EventMachine&lt;/h2&gt;
+
+&lt;h3&gt;Short introduction&lt;/h3&gt;
+
+&lt;p&gt;If you already know what EventMachine is you can jump to the next section.&lt;/p&gt;
+
+&lt;p&gt;When you write a standard ruby application your program once executed will run from the start to the end in a linear way, now this is where EventMachine slightly change things: when you execute an EventMachine based ruby application you are no longer in charge of the "main loop" which is now C code, instead you register for events and do action based on those events.&lt;br&gt;
+A simple example would be a console program: when you are waiting for user input the application is doing nothing and that would be where the EventMachine main loop is, then when a user type something a callback in your application is called with the text, after you handled it the EventMachine main loop takes back control.&lt;/p&gt;
+
+&lt;h3&gt;How can it help us&lt;/h3&gt;
+
+&lt;p&gt;Fibers power are best put to use in an asynchronous environment, in ruby we have the great EventMachine
+but working in asynchronous mode is a real pain, here is an example from the em-http-request gem:&lt;/p&gt;
+
+&lt;pre&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;require&lt;/span&gt; &lt;span class="s1"&gt;'eventmachine'&lt;/span&gt;
+&lt;span class="nb"&gt;require&lt;/span&gt; &lt;span class="s1"&gt;'em-http-request'&lt;/span&gt;
+
+&lt;span class="no"&gt;EM&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;run&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;
+  &lt;span class="n"&gt;http&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="no"&gt;EM&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="no"&gt;HttpRequest&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;new&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'http://google.com/'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+      &lt;span class="ss"&gt;:query&lt;/span&gt; &lt;span class="o"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;'keyname'&lt;/span&gt; &lt;span class="o"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="s1"&gt;'value'&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="p"&gt;)&lt;/span&gt;
+
+  &lt;span class="n"&gt;http&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;errback&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="nb"&gt;p&lt;/span&gt; &lt;span class="s1"&gt;'Uh oh'&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; &lt;span class="no"&gt;EM&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;stop&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+  &lt;span class="n"&gt;http&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;callback&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;
+    &lt;span class="nb"&gt;p&lt;/span&gt; &lt;span class="n"&gt;http&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;response_header&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;status&lt;/span&gt;
+    &lt;span class="nb"&gt;p&lt;/span&gt; &lt;span class="n"&gt;http&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;response_header&lt;/span&gt;
+    &lt;span class="nb"&gt;p&lt;/span&gt; &lt;span class="n"&gt;http&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;response&lt;/span&gt;
+
+    &lt;span class="no"&gt;EM&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;stop&lt;/span&gt;
+  &lt;span class="k"&gt;end&lt;/span&gt;
+
+  &lt;span class="nb"&gt;puts&lt;/span&gt; &lt;span class="s2"&gt;"Done."&lt;/span&gt;
+&lt;span class="k"&gt;end&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/pre&gt;
+
+&lt;p&gt;The callback and errback block you provide will be executed respectively when a result or an error arrives and the execution will continue so "Done." will be displayed before any of the two blocks.&lt;br&gt;
+We can use Threads/Fibers to transform any asynchronous code path to match the  synchronous code path we are used to work with, here is an example:&lt;/p&gt;
+
+&lt;pre&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;require&lt;/span&gt; &lt;span class="s1"&gt;'fiber'&lt;/span&gt;
+&lt;span class="nb"&gt;require&lt;/span&gt; &lt;span class="s1"&gt;'eventmachine'&lt;/span&gt;
+&lt;span class="nb"&gt;require&lt;/span&gt; &lt;span class="s1"&gt;'em-http-request'&lt;/span&gt;
+
+&lt;span class="no"&gt;EM&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;run&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;
+  &lt;span class="no"&gt;Fiber&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;new&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;
+    &lt;span class="n"&gt;fb&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="no"&gt;Fiber&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;current&lt;/span&gt;
+    &lt;span class="n"&gt;http&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="no"&gt;EM&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="no"&gt;HttpRequest&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;new&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'http://google.com/'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+        &lt;span class="ss"&gt;:query&lt;/span&gt; &lt;span class="o"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;'keyname'&lt;/span&gt; &lt;span class="o"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="s1"&gt;'value'&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+      &lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;http&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;errback&lt;/span&gt;  &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="n"&gt;fb&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;resume&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="n"&gt;http&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;callback&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="n"&gt;fb&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;resume&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+
+    &lt;span class="c1"&gt;# suspend the fiber&lt;/span&gt;
+    &lt;span class="no"&gt;Fiber&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;yield&lt;/span&gt;
+
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;http&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;error&lt;/span&gt;
+      &lt;span class="nb"&gt;puts&lt;/span&gt; &lt;span class="s1"&gt;'An error occured, damn !'&lt;/span&gt;
+    &lt;span class="k"&gt;else&lt;/span&gt;
+      &lt;span class="nb"&gt;p&lt;/span&gt; &lt;span class="n"&gt;http&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;response_header&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;status&lt;/span&gt;
+      &lt;span class="nb"&gt;p&lt;/span&gt; &lt;span class="n"&gt;http&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;response_header&lt;/span&gt;
+      &lt;span class="nb"&gt;p&lt;/span&gt; &lt;span class="n"&gt;http&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;response&lt;/span&gt;
+    &lt;span class="k"&gt;end&lt;/span&gt;
+
+    &lt;span class="no"&gt;EM&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="n"&gt;stop&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+  &lt;span class="k"&gt;end&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;resume&lt;/span&gt;
+&lt;span class="k"&gt;end&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/pre&gt;
+
+&lt;p&gt;See what we did ? The program execution is now linear in the fiber, this code may run a little slower
+than the asynchronous code I never did any serious benchmarks but the program is so much easier to
+write this way that you will see immediate gains right away !  &lt;/p&gt;
+
+&lt;p&gt;Note that the same can be done with threads&lt;/p&gt;
+
+&lt;pre&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;require&lt;/span&gt; &lt;span class="s1"&gt;'eventmachine'&lt;/span&gt;
+&lt;span class="nb"&gt;require&lt;/span&gt; &lt;span class="s1"&gt;'em-http-request'&lt;/span&gt;
+
+&lt;span class="no"&gt;EM&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;run&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;
+  &lt;span class="no"&gt;Thread&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;new&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;
+    &lt;span class="n"&gt;th&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="no"&gt;Thread&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;current&lt;/span&gt;
+    &lt;span class="n"&gt;http&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="no"&gt;EM&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="no"&gt;HttpRequest&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;new&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'http://google.com/'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
+        &lt;span class="ss"&gt;:query&lt;/span&gt; &lt;span class="o"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;'keyname'&lt;/span&gt; &lt;span class="o"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="s1"&gt;'value'&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+      &lt;span class="p"&gt;)&lt;/span&gt;
+
+    &lt;span class="n"&gt;http&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;errback&lt;/span&gt;  &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="n"&gt;th&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;wakeup&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+    &lt;span class="n"&gt;http&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;callback&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; &lt;span class="n"&gt;th&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;wakeup&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+
+    &lt;span class="c1"&gt;# suspend the thread until explicit&lt;/span&gt;
+    &lt;span class="c1"&gt;# wakeup&lt;/span&gt;
+    &lt;span class="nb"&gt;sleep&lt;/span&gt;
+
+    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;http&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;error&lt;/span&gt;
+      &lt;span class="nb"&gt;puts&lt;/span&gt; &lt;span class="s1"&gt;'An error occured, damn !'&lt;/span&gt;
+    &lt;span class="k"&gt;else&lt;/span&gt;
+      &lt;span class="nb"&gt;p&lt;/span&gt; &lt;span class="n"&gt;http&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;response_header&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;status&lt;/span&gt;
+      &lt;span class="nb"&gt;p&lt;/span&gt; &lt;span class="n"&gt;http&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;response_header&lt;/span&gt;
+      &lt;span class="nb"&gt;p&lt;/span&gt; &lt;span class="n"&gt;http&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;response&lt;/span&gt;
+    &lt;span class="k"&gt;end&lt;/span&gt;
+
+    &lt;span class="no"&gt;EM&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="n"&gt;stop&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+  &lt;span class="k"&gt;end&lt;/span&gt;
+&lt;span class="k"&gt;end&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/pre&gt;
+
+&lt;p&gt;Fiber have another limitation though, they only have access to a limited stack size (4Kb in 1.9.2), while
+you may use fibers without even noticing there is a catch: rails 3.1 which hit stable release recently can hit the boundaries of a fiber stack (see my &lt;a href="https://github.com/schmurfy/assets_crash"&gt;Rails 3.1 test application&lt;/a&gt;) resulting in a stack overflow error and the sad thing is that there nothing you can really do about this if you are not running your own server with a modified ruby interpreter extending the stack.&lt;/p&gt;
+
+&lt;p&gt;A last example to show you how to do a sleep in an EventMachine fibered application:&lt;/p&gt;
+
+&lt;pre&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;require&lt;/span&gt; &lt;span class="s1"&gt;'fiber'&lt;/span&gt;
+&lt;span class="nb"&gt;require&lt;/span&gt; &lt;span class="s1"&gt;'eventmachine'&lt;/span&gt;
+
+&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;em_sleep&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+  &lt;span class="n"&gt;fb&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="no"&gt;Fiber&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;current&lt;/span&gt;
+  &lt;span class="no"&gt;EM&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="n"&gt;add_timer&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="p"&gt;){&lt;/span&gt; &lt;span class="n"&gt;fb&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;resume&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+  &lt;span class="no"&gt;Fiber&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;yield&lt;/span&gt;
+&lt;span class="k"&gt;end&lt;/span&gt;
+
+&lt;span class="no"&gt;EM&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="n"&gt;run&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;
+  &lt;span class="n"&gt;fb1&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="no"&gt;Fiber&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;new&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;
+    &lt;span class="nb"&gt;puts&lt;/span&gt; &lt;span class="s2"&gt;"[Fiber 1] Started"&lt;/span&gt;
+    &lt;span class="n"&gt;em_sleep&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;
+    &lt;span class="nb"&gt;puts&lt;/span&gt; &lt;span class="s2"&gt;"[Fiber 1] Completed"&lt;/span&gt;
+    &lt;span class="no"&gt;EM&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="n"&gt;stop&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+  &lt;span class="k"&gt;end&lt;/span&gt;
+
+  &lt;span class="n"&gt;fb2&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="no"&gt;Fiber&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;new&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;
+    &lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;times&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="nb"&gt;puts&lt;/span&gt; &lt;span class="s2"&gt;"[Fiber 2] tick &lt;/span&gt;&lt;span class="si"&gt;#{&lt;/span&gt;&lt;span class="n"&gt;n&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+  &lt;span class="k"&gt;end&lt;/span&gt;
+
+  &lt;span class="n"&gt;fb1&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;resume&lt;/span&gt;
+  &lt;span class="n"&gt;fb2&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;resume&lt;/span&gt;
+&lt;span class="k"&gt;end&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/pre&gt;
+
+&lt;p&gt;And here is the output:&lt;/p&gt;
+
+&lt;pre&gt;&lt;div class="highlight"&gt;&lt;pre&gt;[Fiber 1] Started
+[Fiber 2] tick 0
+[...]
+[Fiber 2] tick 9
+[Fiber 1] Completed
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/pre&gt;
+
+&lt;p&gt;One last thing to know about fibers is that you can only one running as I already said but this limitation is per thread so you could have more fibers running but I see little use fot this case since you get get back to the same problems you would have with threads.&lt;/p&gt;
+
+&lt;h2&gt;My experience in this field&lt;/h2&gt;
+
+&lt;p&gt;I designed and implemented the core and network library of my current company's ruby servers,
+these servers form a telecommunication platform and interface themselves with an heavy client
+on user's computers as well as an Asterisk server, only one out of now 4/5 application servers is
+a Ruby On Rails application the others are headless EventMachine servers communicating with each other.&lt;/p&gt;
+
+&lt;p&gt;When development started ruby 1.9 was not yet released and so I started the work on 1.8 with threads
+and then later switched to 1.9 + fibers to get away from the thread concurrency hell, our productivity
+raised by a great factor and the overall performances too (faster queries) but ruby 1.9 by itself
+is faster than 1.8 so both implementations cannot be fairly compared.&lt;/p&gt;
+
+&lt;h2&gt;Interesting links&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="http://oldmoe.blogspot.com/2008/08/ruby-fibers-vs-ruby-threads.html"&gt;Threads vs Fibers resources usage&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://github.com/igrigorik/em-synchrony" title="A set of helpers to work witi fibers"&gt;em-synchrony&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://github.com/eventmachine/eventmachine"&gt;EventMachine&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</content>
+  </entry>
   <entry>
     <id>tag:schmurfy.github.com,2011-08-12:/2011/08/12/building_rack_middleware_with_sinatra.html</id>
     <title type="html">Building a Rack Middleware with sinatra</title>
@@ -560,186 +883,5 @@ appears shortly.&lt;/p&gt;
 
 &lt;p&gt;One thing allowing this setup to work is that nanoc do not delete the output folder
 when rebuilding the site, it justs overwrite existing files.&lt;/p&gt;</content>
-  </entry>
-  <entry>
-    <id>tag:schmurfy.github.com,2011-05-03:/2011/05/03/simple_yet_secure_file_server.html</id>
-    <title type="html">Simple yet secure file server</title>
-    <published>2011-05-03T20:00:00Z</published>
-    <updated>2011-05-03T20:00:00Z</updated>
-    <link rel="alternate" href="http://schmurfy.github.com/2011/05/03/simple_yet_secure_file_server.html"/>
-    <content type="html">&lt;p&gt;This is a problem I faced many times but did not had the opportunity to find a good approach to the problem,
-recently I faced it once again and found what i consider a really nice way to implement it efficiently and securely.&lt;/p&gt;
-
-&lt;h2&gt;The problem&lt;/h2&gt;
-
-&lt;p&gt;The problem is quite simple to describe: how can you serve a file to a given client without allowing it full
-access to the repository, and serves it fast and efficiently resources wise.&lt;/p&gt;
-
-&lt;h2&gt;My environment&lt;/h2&gt;
-
-&lt;p&gt;Here are some background on my environment to better understand why I did things that way: The application I work
-on is already made of multiple distinct ruby servers/daemons speaking to each other using an in house network protocol,
-aside of those I already have a redis server used mostly for caching data.&lt;/p&gt;
-
-&lt;h2&gt;Let's get to work !&lt;/h2&gt;
-
-&lt;p&gt;Among time I tried different solutions to this problem:&lt;/p&gt;
-
-&lt;h3&gt;The worst method&lt;/h3&gt;
-
-&lt;p&gt;You set up a webserver to serve a defined folder where all your files are
-  and your disable the autoindex feature.&lt;/p&gt;
-
-&lt;p&gt;The problems are:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;if someone have he link it can download again the file whenever he wants
-(it may or may not be a problem depending on your usage)&lt;/li&gt;
-&lt;li&gt;a client with the link can pass it to anyone to download the file&lt;/li&gt;
-&lt;li&gt;a client may guess another file's path and download it&lt;/li&gt;
-&lt;/ul&gt;&lt;p&gt;The last time I used this method the filenames were alphanumeric strings
-  of 32 characters, this at least reduce the guessing risk to nearly zero&lt;/p&gt;
-
-&lt;h3&gt;The second, slightly better&lt;/h3&gt;
-
-&lt;p&gt;We now have a web application (php, ruby, perl, etc...) which serves the pages
-  to the clients, the files are stored on the disk outside the webserver root and so, are not
-  accessible directly by clients.&lt;/p&gt;
-
-&lt;p&gt;The application authenticate the client (how it is done is irrelevant here) and then the
-  application sends the file's content itself to the client.&lt;/p&gt;
-
-&lt;p&gt;The problems:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;You monopolize one instance of your application for this task (it is
-especially a problem with ruby on rails)&lt;/li&gt;
-&lt;li&gt;chances are that streaming the file through your application will slow down
-the transfer speed and it can takes more resources on the server.&lt;/li&gt;
-&lt;/ul&gt;&lt;p&gt;At least with this approach a client can no longer access a file we don't want him
-  to download and even if he manages to guess another file's name he will just be rejected.&lt;/p&gt;
-
-&lt;p&gt;Clients can still exchanges login/pass but that's another story, let's consider that our
-  clients here do not share passwords.&lt;/p&gt;
-
-&lt;h3&gt;Now we talk&lt;/h3&gt;
-
-&lt;p&gt;I know this is not a terribly big news but apache have support for sending files directly
-  to a client when asked by an application running below it, when an application returns
-  an header "X-Sendfile" pointing to an absolute path on the webserver disk then this file
-  will be streamed by apache to the client.&lt;/p&gt;
-
-&lt;p&gt;Nginx has a similar feature but it works differently, here is an example config file:&lt;/p&gt;
-
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="k"&gt;server&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-  &lt;span class="kn"&gt;listen&lt;/span&gt; &lt;span class="mi"&gt;3000&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-
-  &lt;span class="kn"&gt;location&lt;/span&gt; &lt;span class="s"&gt;/&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-    &lt;span class="kn"&gt;root&lt;/span&gt; &lt;span class="s"&gt;'[...]/public'&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-
-    &lt;span class="kn"&gt;passenger_enabled&lt;/span&gt; &lt;span class="no"&gt;on&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="kn"&gt;passenger_min_instances&lt;/span&gt; &lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-  &lt;span class="p"&gt;}&lt;/span&gt;
-
-  &lt;span class="kn"&gt;location&lt;/span&gt; &lt;span class="s"&gt;"/data"&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-    &lt;span class="kn"&gt;internal&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="kn"&gt;root&lt;/span&gt; &lt;span class="s"&gt;"/path/to/data"&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-  &lt;span class="p"&gt;}&lt;/span&gt;
-&lt;span class="p"&gt;}&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-  
-
-&lt;p&gt;We have a sinatra application running under passenger on port 3000 and we declare
-  an internal location where our files are, the /data path will not be accessible
-  for web clients.&lt;/p&gt;
-
-&lt;p&gt;Now the next part is to send the required headers, here is what a minimal sinatra
-  application looks like for doing this:
-&lt;/p&gt;&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;require&lt;/span&gt; &lt;span class="s1"&gt;'rubygems'&lt;/span&gt;
-&lt;span class="nb"&gt;require&lt;/span&gt; &lt;span class="s1"&gt;'sinatra'&lt;/span&gt;
-
-&lt;span class="n"&gt;get&lt;/span&gt; &lt;span class="s2"&gt;"/:token/*"&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;
-  &lt;span class="c1"&gt;# we use splat here to allow the path to include "/"&lt;/span&gt;
-  &lt;span class="n"&gt;path&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;params&lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="ss"&gt;:splat&lt;/span&gt;&lt;span class="o"&gt;].&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'/'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-  &lt;span class="n"&gt;content_type&lt;/span&gt; &lt;span class="s1"&gt;'application/x-zip'&lt;/span&gt;
-
-&lt;span class="n"&gt;headers&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
-      &lt;span class="c1"&gt;# Set the filename for the browser, you can force it&lt;/span&gt;
-      &lt;span class="c1"&gt;# or just use the original one ( File.basename(path) )&lt;/span&gt;
-      &lt;span class="s2"&gt;"Content-Disposition"&lt;/span&gt; &lt;span class="o"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="s2"&gt;"attachment; filename=&lt;/span&gt;&lt;span class="se"&gt;\"&lt;/span&gt;&lt;span class="s2"&gt;file.txt&lt;/span&gt;&lt;span class="se"&gt;\"&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
-
-  &lt;span class="c1"&gt;# and ask nginx to send this file to the client&lt;/span&gt;
-  &lt;span class="s2"&gt;"X-Accel-Redirect"&lt;/span&gt; &lt;span class="o"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="s2"&gt;"/data/&lt;/span&gt;&lt;span class="si"&gt;#{&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;
-&lt;span class="p"&gt;)&lt;/span&gt;
-
-
-&lt;span class="c1"&gt;# finally return an empty body&lt;/span&gt;
-  &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="s2"&gt;""&lt;/span&gt;
-&lt;span class="k"&gt;end&lt;/span&gt;
-&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;This is a minimal application, no authentication, no security check.
-  Now if we want a full application we need some kind of strategy to ensure the client
-  have access to the file he asked, I did this by using redis:&lt;/p&gt;
-
-&lt;p&gt;When a client wants a file he first needs to ask our main application (this is
-  the one he is connected to), this application will respond with a token and a path (
-  the token is saved in the redis database and set to expire in a fixed delay),
-  the client will then ask the file server for this file with the token just received,
-  here is the complete sinatra application:&lt;/p&gt;
-
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="nb"&gt;require&lt;/span&gt; &lt;span class="s1"&gt;'rubygems'&lt;/span&gt;
-&lt;span class="nb"&gt;require&lt;/span&gt; &lt;span class="s1"&gt;'sinatra'&lt;/span&gt;
-&lt;span class="nb"&gt;require&lt;/span&gt; &lt;span class="s1"&gt;'redis'&lt;/span&gt;
-
-
-&lt;span class="n"&gt;get&lt;/span&gt; &lt;span class="s2"&gt;"/:token/*"&lt;/span&gt; &lt;span class="k"&gt;do&lt;/span&gt;
-  &lt;span class="c1"&gt;# Connect to the redis database&lt;/span&gt;
-  &lt;span class="n"&gt;redis&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="no"&gt;Redis&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;new&lt;/span&gt;
-  &lt;span class="c1"&gt;# check the specified token&lt;/span&gt;
-  &lt;span class="n"&gt;allowed_path&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;redis&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;get&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"file_download:&lt;/span&gt;&lt;span class="si"&gt;#{&lt;/span&gt;&lt;span class="n"&gt;params&lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="ss"&gt;:token&lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-  &lt;span class="n"&gt;path&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;params&lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="ss"&gt;:splat&lt;/span&gt;&lt;span class="o"&gt;].&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'/'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-
-  &lt;span class="c1"&gt;# only only passage if the token exists and the path asked&lt;/span&gt;
-  &lt;span class="c1"&gt;# is the same as the one associated with the token in redis&lt;/span&gt;
-  &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;path&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;allowed_path&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
-    &lt;span class="c1"&gt;# set the content type so the browser reacts as expected&lt;/span&gt;
-    &lt;span class="n"&gt;content_type&lt;/span&gt; &lt;span class="s1"&gt;'xxx/yyy'&lt;/span&gt;
-
-    &lt;span class="n"&gt;headers&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;
-        &lt;span class="s2"&gt;"Content-Disposition"&lt;/span&gt; &lt;span class="o"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="sx"&gt;%{attachment; filename="file.ext"}&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
-        &lt;span class="s2"&gt;"X-Accel-Redirect"&lt;/span&gt; &lt;span class="o"&gt;=&amp;gt;&lt;/span&gt; &lt;span class="s2"&gt;"/data/&lt;/span&gt;&lt;span class="si"&gt;#{&lt;/span&gt;&lt;span class="n"&gt;path&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;
-      &lt;span class="p"&gt;)&lt;/span&gt;
-    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="s2"&gt;""&lt;/span&gt;
-  &lt;span class="k"&gt;else&lt;/span&gt;
-    &lt;span class="c1"&gt;# return a 404 if access is refused&lt;/span&gt;
-    &lt;span class="c1"&gt;# so the client have no way to tells if access was refused&lt;/span&gt;
-    &lt;span class="c1"&gt;# or the file really does not exists&lt;/span&gt;
-    &lt;span class="k"&gt;raise&lt;/span&gt; &lt;span class="no"&gt;Sinatra&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="no"&gt;NotFound&lt;/span&gt;
-  &lt;span class="k"&gt;end&lt;/span&gt;
-&lt;span class="k"&gt;end&lt;/span&gt;  
-&lt;/pre&gt;&lt;/div&gt;
-
-  
-
-&lt;p&gt;Since the keys in redis have an expiration delay the client is only allowed to
-  access the file once and has to make another request to download it again.&lt;/p&gt;
-
-&lt;p&gt;The expiration delay can even be really short since the check is done at the
-  start of the download, having a too short delay may cause more problems though
-  if the client need to retry the download for any reason.&lt;/p&gt;
-
-&lt;h2&gt;Conclusion&lt;/h2&gt;
-
-&lt;p&gt;Thanks to redis (it would also work with any database actually) you can distribute the
-  roles between your applications as you wish and with the configuration shown above any
-  application in your environment could deliver a pass to access a given file allowing
-  them to share a single "file server" and still maintaining tight access control.&lt;/p&gt;
-
-&lt;p&gt;Following the same idea we could also register a number of allowed downloads in redis
-  and decrement the counter each time the url is accessed, the atomic nature of redis
-  operations makes this really easy to do.&lt;/p&gt;</content>
   </entry>
 </feed>
