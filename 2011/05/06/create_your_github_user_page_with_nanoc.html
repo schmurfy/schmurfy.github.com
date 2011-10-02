@@ -106,7 +106,7 @@ we wil now see how (there is a guide on github to do this too).</p>
 <p>Now we have a master branch containing our site's source which is not yet what we
 want, so we will now rename this branch and push it to the remote:</p>
 
-<div class="highlight"><pre><span class="c"># rename our master branch</span>&#x000A;  <span class="nv">$ </span>git br -m master <span class="nb">source</span>&#x000A;<span class="c"># add your github repository as origin</span>&#x000A;  <span class="nv">$ </span>git add origin git@github.com:<span class="o">[</span>user<span class="o">]</span>/<span class="o">[</span>user<span class="o">]</span>.github.com.git&#x000A;<span class="c"># push to the remote repository and set the master local branch to</span>&#x000A;<span class="c"># track origin/master</span>&#x000A;  <span class="nv">$ </span>git push -u origin master</pre></div>
+<div class="highlight"><pre><span class="c"># rename our master branch</span>&#x000A;  <span class="nv">$ </span>git br -m master <span class="nb">source</span>&#x000A;<span class="c"># add your github repository as origin</span>&#x000A;  <span class="nv">$ </span>git remote add origin git@github.com:<span class="o">[</span>user<span class="o">]</span>/<span class="o">[</span>user<span class="o">]</span>.github.com.git&#x000A;<span class="c"># push to the remote repository and set the source local branch to</span>&#x000A;<span class="c"># track origin/source</span>&#x000A;  <span class="nv">$ </span>git push -u origin <span class="nb">source</span></pre></div>
 
 
 <p>We have a repository with only one branch: source, now we can create the master branch.<br>
