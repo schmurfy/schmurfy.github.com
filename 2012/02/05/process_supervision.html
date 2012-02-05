@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Process supervision</title>
+<meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+<meta content=', ruby, supervisor, daemontools, monit, god' name='keywords'>
+<link href='/assets/css/pygment.css' media='screen' rel='stylesheet' type='text/css'>
+<link href='/assets/css/style.css' media='screen' rel='stylesheet' type='text/css'>
+<script src='/assets/js/jquery-1.6.min.js' type='text/javascript'></script>
+<script src='/assets/js/humane.js' type='text/javascript'></script>
+<script src='/assets/js/app.js' type='text/javascript'></script>
+<script src='/assets/js/disqus.js' type='text/javascript'></script>
+<link href='http://feeds.feedburner.com/schmurfy' rel='alternate' title='schmurfy.github.com' type='application/atom+xml'>
+<link href='http://fonts.googleapis.com/css?family=Expletus+Sans:700' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Droid+Serif' rel='stylesheet' type='text/css'>
+<script>
+  //<![CDATA[
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-23121021-1']);
+    _gaq.push(['_trackPageview']);
+    
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  //]]>
+</script>
+
+
+</head>
+<body>
+<div id='page'>
+<div id='inner-page'>
+<a class='fork_me' href='http://github.com/schmurfy'>
+<img alt='Fork me on GitHub' src='https://d3nwyuy0nl342s.cloudfront.net/img/e6bef7a091f5f3138b8cd40bc3e114258dd68ddf/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67'>
+</a>
+<div id='header'>
+<h1 class='blog_title'>
+<a href='/'>Chained experiments</a>
+</h1>
+</div>
+<div id='content'>
+<div class='article'>
+<div class='article_date date' title='2012-02-05T17:00:00Z'>Feb 05, 2012</div>
+<h1 class='title'>
+<a href='/2012/02/05/process_supervision.html'>Process supervision</a>
+</h1>
+<div class='tags'><a href="/tags/daemontools/" class="tag">daemontools</a>, <a href="/tags/god/" class="tag">god</a>, <a href="/tags/monit/" class="tag">monit</a>, <a href="/tags/ruby/" class="tag">ruby</a>, <a href="/tags/supervisor/" class="tag">supervisor</a></div>
+<div class='body'>
+<p>If you ever had to administer some servers you necessarily stumbled upon this problem:<br>
+How can I make sure all my applications are running and restarted on crash ?</p>
+
+<p>There are three different schools I know of for doing this:</p>
+
+<h2>My applications never crashs</h2>
+
+<p>let's call this one the silly man, you are sure your application will never ever crash and
+so a basic init script will work for you but if something fails you will probably never know
+until a client calls your support.</p>
+
+<p>In this category we have the init system used on many linux/bsd hosts, they vary in execution
+but the idea stays the same: you have a script, when called with start as argument it starts the
+application and when called with stop it stops it.<br>
+This approach works well if you are sure the applications will behave well no matter what and
+cannot crash (or have their how supervisor mechanism).</p>
+
+<h2>Polling (by PIDs)</h2>
+
+<p>The second way of doing it is to have a dedicated application watching process on a regular basis
+using their pids, for me the problem with this approach is the lag between the time the process crash and the time
+the external supervisor notices that the application is not running.</p>
+
+<p>Some seconds can look ridiculous but it is not even with a low traffic system especially with persistant connections.</p>
+
+<p>In this category we have (These are the main one I know, I am sure there is a lot more):</p>
+
+<ul>
+<li>monit</li>
+<li>god (ruby application)</li>
+<li>bluepill (ruby too)</li>
+</ul><p>The first one is a C application and works more or less but I dropped it the first day I noticed
+it did not restart a process as I requested it to.</p>
+
+<p>The other two have an incredibly horrible syntax to configure what you want to monitor so I never
+really tried any of them but I am not really fond of the way those three do things anyway.</p>
+
+<h2>Subprocesses</h2>
+
+<h3>Daemontools</h3>
+
+<p>The last way of supervising processes is to spawn them as child of the supervisor, I used daemontools
+until now and it works really well. If one of your application crash daemontools is notified right away and can restart the process without delay.<br>
+The things I always missed with daemontools is the ability to control (with something else than command line) and be notified of what actually happens
+and the lack of resources usage monitoring (if you want to to restart a process taking 100% for too much time).</p>
+
+<p>Daemontools have another particularity: it supposes your daemon will not fork in the background and output its logs to stdout so they can be piped to a dedicated process
+writing and rotating them on disk.</p>
+
+<p>I really love to consider a daemon that way for many reasons:</p>
+
+<ul>
+<li><p>since you do not need to go in the background you can run your application in production
+the same way as in development plus you don't need to invest time figuring out how to
+go in the background.</p></li>
+<li><p>no need for any specialized logger class/object, just write on stdout and you are good to go,
+the default process for handling logs with daemontools can add the timestamp in front of the lines
+you write on stdout so you can even remove that from your code.</p></li>
+<li><p>no need to write a pid file anywhere, this is not that the task is hard but it is one less thing you have
+to worry about.</p></li>
+<li><p>the daemontools logger process can guarantee you that the space taken by the log files will never exceed
+what you allow (X files of Y bytes) unlike syslog (newsyslog to be precise) for example which only do checks on a regular basis
+and cannot prevent an application to flood your disk (at least not the syslog installed by default on most distributions).</p></li>
+</ul><h3>Supervisor</h3>
+
+<p>In this category I only had daemontools for a long time but I recently stumbled on another interesting alternative: <a href="http://supervisord.org/">supervisor</a>.</p>
+
+<p>it does most if not all the things described above but add some nice ones:</p>
+
+<ul>
+<li>an XLM-RPC interface allowing full control over supervisor from another process.</li>
+<li>you can register notification process which will be notified of any state change for your
+applications (start, stop, restart).</li>
+<li>you can use the registration functionality to register specialized process monitoring
+the resources used by each application and act on it with the XML-RPC interface</li>
+<li>process have more than one state, if a process crash on start it will be put aside
+and it will try to restart it later instead of burning the cpu like daemontools does.</li>
+</ul><p>I am just in testing phases for supervisord currently but I have high hopes for it.</p>
+
+<p>If you have other interesting supervision application I would gladly hear about them if they have interesting options to offer.</p>
+<div class='comments'>
+<div id='disqus_thread'></div>
+<script>
+  //<![CDATA[
+    var disqus_shortname = 'chainedexperiments';
+    
+    // The following are highly recommended additional parameters. Remove the slashes in front to use.
+    var disqus_url = 'http://schmurfy.github.com/2012/02/05/process_supervision.html';
+    var disqus_identifier = '2012/02/05 18:00';
+    
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  //]]>
+</script>
+
+</div>
+
+</div>
+</div>
+
+<div class='clear'></div>
+</div>
+<div id='sidebox'>
+<h2>General</h2>
+<ul>
+<li>
+<a href='/about.html'>Who am I ?</a>
+</li>
+<li>
+<a href='http://feeds.feedburner.com/schmurfy'>RSS Feed</a>
+</li>
+</ul>
+<!-- %h2 Projects -->
+<!-- %ul -->
+<!-- %li -->
+<!-- %a{:href => "/projects/drone.html"} Drone -->
+<h2>Recent posts</h2>
+<ul>
+<li>
+<a href='/2012/02/05/process_supervision.html' title='Full article'>Process supervision</a>
+</li>
+<li>
+<a href='/2011/09/25/on_fibers_and_threads.html' title='Full article'>On fibers and threads</a>
+</li>
+<li>
+<a href='/2011/08/12/building_rack_middleware_with_sinatra.html' title='Full article'>Building a Rack Middleware with sinatra</a>
+</li>
+<li>
+<a href='/2011/06/04/doing_things_differently_erlang.html' title='Full article'>Doing things differently: Erlang</a>
+</li>
+</ul>
+<h2>Tags</h2>
+<ul>
+<li>
+<a href='/tags/ruby/'>ruby</a>
+(6)
+</li>
+<li>
+<a href='/tags/sinatra/'>sinatra</a>
+(2)
+</li>
+<li>
+<a href='/tags/metrics/'>metrics</a>
+(1)
+</li>
+<li>
+<a href='/tags/redis/'>redis</a>
+(1)
+</li>
+<li>
+<a href='/tags/nanoc/'>nanoc</a>
+(1)
+</li>
+<li>
+<a href='/tags/nanoc3/'>nanoc3</a>
+(1)
+</li>
+<li>
+<a href='/tags/github/'>github</a>
+(1)
+</li>
+<li>
+<a href='/tags/blog/'>blog</a>
+(1)
+</li>
+<li>
+<a href='/tags/monitoring/'>monitoring</a>
+(1)
+</li>
+<li>
+<a href='/tags/nginx/'>nginx</a>
+(1)
+</li>
+<li>
+<a href='/tags/collectd/'>collectd</a>
+(1)
+</li>
+<li>
+<a href='/tags/erlang/'>Erlang</a>
+(1)
+</li>
+<li>
+<a href='/tags/rack/'>rack</a>
+(1)
+</li>
+<li>
+<a href='/tags/thread/'>thread</a>
+(1)
+</li>
+<li>
+<a href='/tags/fiber/'>fiber</a>
+(1)
+</li>
+<li>
+<a href='/tags/supervisor/'>supervisor</a>
+(1)
+</li>
+<li>
+<a href='/tags/daemontools/'>daemontools</a>
+(1)
+</li>
+<li>
+<a href='/tags/monit/'>monit</a>
+(1)
+</li>
+<li>
+<a href='/tags/god/'>god</a>
+(1)
+</li>
+</ul>
+<h2>Archives</h2>
+<ul>
+<li>
+<a href='/archives.html'>2012</a>
+</li>
+<li>
+<a href='/archives.html'>2011</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div id='footer'>
+Content and Design © Julien Ammous
+</div>
+<script src='http://include.reinvigorate.net/re_.js' type='text/javascript'></script>
+<script src='http://static.getclicky.com/js' type='text/javascript'></script>
+<script>
+  //<![CDATA[
+    // reinvigorate.com
+    try {
+      reinvigorate.track("a53v7-0774042990");
+    } catch(err) {}
+    
+    // clicky
+    
+    try{
+      clicky.init(66458104);
+    }catch(e){}
+    
+    // Start of Woopra Code
+    var woo_settings = {idle_timeout:'300000', domain:'schmurfy.github.com'};
+    (function(){
+      var wsc = document.createElement('script');
+      wsc.src = document.location.protocol+'//static.woopra.com/js/woopra.js';
+      wsc.type = 'text/javascript';
+      wsc.async = true;
+      var ssc = document.getElementsByTagName('script')[0];
+      ssc.parentNode.insertBefore(wsc, ssc);
+    })();
+  //]]>
+</script>
+</body>
+</html>

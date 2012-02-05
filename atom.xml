@@ -2,13 +2,100 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <id>http://schmurfy.github.com/</id>
   <title>Chained Experiments</title>
-  <updated>2011-09-25T09:00:00Z</updated>
+  <updated>2012-02-05T17:00:00Z</updated>
   <link rel="alternate" href="http://schmurfy.github.com/"/>
   <link rel="self" href="http://schmurfy.github.com/atom.xml"/>
   <author>
     <name>Julien Ammous</name>
     <uri>http://schmurfy.github.com</uri>
   </author>
+  <entry>
+    <id>tag:schmurfy.github.com,2012-02-05:/2012/02/05/process_supervision.html</id>
+    <title type="html">Process supervision</title>
+    <published>2012-02-05T17:00:00Z</published>
+    <updated>2012-02-05T17:00:00Z</updated>
+    <link rel="alternate" href="http://schmurfy.github.com/2012/02/05/process_supervision.html"/>
+    <content type="html">&lt;p&gt;If you ever had to administer some servers you necessarily stumbled upon this problem:&lt;br&gt;
+How can I make sure all my applications are running and restarted on crash ?&lt;/p&gt;
+
+&lt;p&gt;There are three different schools I know of for doing this:&lt;/p&gt;
+
+&lt;h2&gt;My applications never crashs&lt;/h2&gt;
+
+&lt;p&gt;let's call this one the silly man, you are sure your application will never ever crash and
+so a basic init script will work for you but if something fails you will probably never know
+until a client calls your support.&lt;/p&gt;
+
+&lt;p&gt;In this category we have the init system used on many linux/bsd hosts, they vary in execution
+but the idea stays the same: you have a script, when called with start as argument it starts the
+application and when called with stop it stops it.&lt;br&gt;
+This approach works well if you are sure the applications will behave well no matter what and
+cannot crash (or have their how supervisor mechanism).&lt;/p&gt;
+
+&lt;h2&gt;Polling (by PIDs)&lt;/h2&gt;
+
+&lt;p&gt;The second way of doing it is to have a dedicated application watching process on a regular basis
+using their pids, for me the problem with this approach is the lag between the time the process crash and the time
+the external supervisor notices that the application is not running.&lt;/p&gt;
+
+&lt;p&gt;Some seconds can look ridiculous but it is not even with a low traffic system especially with persistant connections.&lt;/p&gt;
+
+&lt;p&gt;In this category we have (These are the main one I know, I am sure there is a lot more):&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;monit&lt;/li&gt;
+&lt;li&gt;god (ruby application)&lt;/li&gt;
+&lt;li&gt;bluepill (ruby too)&lt;/li&gt;
+&lt;/ul&gt;&lt;p&gt;The first one is a C application and works more or less but I dropped it the first day I noticed
+it did not restart a process as I requested it to.&lt;/p&gt;
+
+&lt;p&gt;The other two have an incredibly horrible syntax to configure what you want to monitor so I never
+really tried any of them but I am not really fond of the way those three do things anyway.&lt;/p&gt;
+
+&lt;h2&gt;Subprocesses&lt;/h2&gt;
+
+&lt;h3&gt;Daemontools&lt;/h3&gt;
+
+&lt;p&gt;The last way of supervising processes is to spawn them as child of the supervisor, I used daemontools
+until now and it works really well. If one of your application crash daemontools is notified right away and can restart the process without delay.&lt;br&gt;
+The things I always missed with daemontools is the ability to control (with something else than command line) and be notified of what actually happens
+and the lack of resources usage monitoring (if you want to to restart a process taking 100% for too much time).&lt;/p&gt;
+
+&lt;p&gt;Daemontools have another particularity: it supposes your daemon will not fork in the background and output its logs to stdout so they can be piped to a dedicated process
+writing and rotating them on disk.&lt;/p&gt;
+
+&lt;p&gt;I really love to consider a daemon that way for many reasons:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;since you do not need to go in the background you can run your application in production
+the same way as in development plus you don't need to invest time figuring out how to
+go in the background.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;no need for any specialized logger class/object, just write on stdout and you are good to go,
+the default process for handling logs with daemontools can add the timestamp in front of the lines
+you write on stdout so you can even remove that from your code.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;no need to write a pid file anywhere, this is not that the task is hard but it is one less thing you have
+to worry about.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;the daemontools logger process can guarantee you that the space taken by the log files will never exceed
+what you allow (X files of Y bytes) unlike syslog (newsyslog to be precise) for example which only do checks on a regular basis
+and cannot prevent an application to flood your disk (at least not the syslog installed by default on most distributions).&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;h3&gt;Supervisor&lt;/h3&gt;
+
+&lt;p&gt;In this category I only had daemontools for a long time but I recently stumbled on another interesting alternative: &lt;a href="http://supervisord.org/"&gt;supervisor&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;it does most if not all the things described above but add some nice ones:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;an XLM-RPC interface allowing full control over supervisor from another process.&lt;/li&gt;
+&lt;li&gt;you can register notification process which will be notified of any state change for your
+applications (start, stop, restart).&lt;/li&gt;
+&lt;li&gt;you can use the registration functionality to register specialized process monitoring
+the resources used by each application and act on it with the XML-RPC interface&lt;/li&gt;
+&lt;li&gt;process have more than one state, if a process crash on start it will be put aside
+and it will try to restart it later instead of burning the cpu like daemontools does.&lt;/li&gt;
+&lt;/ul&gt;&lt;p&gt;I am just in testing phases for supervisord currently but I have high hopes for it.&lt;/p&gt;
+
+&lt;p&gt;If you have other interesting supervision application I would gladly hear about them if they have interesting options to offer.&lt;/p&gt;</content>
+  </entry>
   <entry>
     <id>tag:schmurfy.github.com,2011-09-25:/2011/09/25/on_fibers_and_threads.html</id>
     <title type="html">On fibers and threads</title>
@@ -776,112 +863,5 @@ to write any code.&lt;/p&gt;
 
 &lt;p&gt;I am still searching for a better solutions and working on some
 projects which may help but that will be for another time :)&lt;/p&gt;</content>
-  </entry>
-  <entry>
-    <id>tag:schmurfy.github.com,2011-05-06:/2011/05/06/create_your_github_user_page_with_nanoc.html</id>
-    <title type="html">Create your Github user page with nanoc</title>
-    <published>2011-05-06T13:00:00Z</published>
-    <updated>2011-05-06T13:00:00Z</updated>
-    <link rel="alternate" href="http://schmurfy.github.com/2011/05/06/create_your_github_user_page_with_nanoc.html"/>
-    <content type="html">&lt;p&gt;I finally took the time to build myself a fully featured blog and start writing down things that floats
-in my head both for me and for anyone it can help.&lt;br&gt;
-I was sure of one thing: I wanted a static blog, I do not want having to learn to use a complex
-admin interface that would certainly not fit me needs and end with a fork to maintain...&lt;br&gt;
-Another reason is that I prefer to edit posts in my favorite text editor (that would be textmate)
-than editing it online with a pale copy of a real text editor.&lt;/p&gt;
-
-&lt;p&gt;I was looking at github user pages for quite some time but the quick look I gave to jekyll did not convinced
-me so here is an alternative way to build your github user page without using jekyll.&lt;/p&gt;
-
-&lt;h2&gt;What we will use&lt;/h2&gt;
-
-&lt;p&gt;Nanoc is a powerful ruby static website generator, I already used it before for a personal documentation
-repository (something like my personal knowledge database) and tested the alternatives before settling on
-it so there was little to no reason to switch except if a new alternative with more features had appeared
-but jekyll is certainly not that.&lt;/p&gt;
-
-&lt;p&gt;So nanoc it is !&lt;br&gt;&lt;/p&gt;
-
-&lt;p&gt;This article will not teach you how to use nanoc by itself, if you are interested in it you can check:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href="http://nanoc.stoneship.org/"&gt;The Official Website&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://github.com/mgutz/nanoc3_blog"&gt;The template I based mine on&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://github.com/schmurfy/schmurfy.github.com/tree/source"&gt;And obviously my template&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;&lt;h2&gt;How github user's pages work&lt;/h2&gt;
-
-&lt;p&gt;The user page system is really simple to use and works really well, what they did is that if you create a repository
-with a special name (&lt;code&gt;&amp;lt;user&amp;gt;&lt;/code&gt;.github.com) then anything pushed in the master branch will be available at the
-same address, pretty neat and effective !&lt;/p&gt;
-
-&lt;p&gt;The master branch can either contains raw html/css/... documents or a jekyll project which will be
-used to generate the html so in our case we want to push the resulting output from nanoc.&lt;/p&gt;
-
-&lt;h2&gt;Workspace organization&lt;/h2&gt;
-
-&lt;p&gt;What I did is use another branch than master to host the actual nanoc application and push the
-resulting html in the master branch, here is how I organized my workspace:&lt;/p&gt;
-
-&lt;div class="highlight"&gt;&lt;pre&gt;root &lt;span class="o"&gt;[&lt;/span&gt; -&amp;gt; &lt;span class="s2"&gt;"source"&lt;/span&gt; &lt;span class="o"&gt;]&lt;/span&gt;
-  |- content &lt;span class="o"&gt;(&lt;/span&gt;nanoc templates&lt;span class="o"&gt;)&lt;/span&gt;
-  |- layouts &lt;span class="o"&gt;(&lt;/span&gt;nanoc layouts&lt;span class="o"&gt;)&lt;/span&gt;
-  |- lib &lt;span class="o"&gt;(&lt;/span&gt;ruby files extending nanoc&lt;span class="o"&gt;)&lt;/span&gt;
-  |- output &lt;span class="o"&gt;[&lt;/span&gt; -&amp;gt; &lt;span class="s2"&gt;"master"&lt;/span&gt; &lt;span class="o"&gt;]&lt;/span&gt;
-  
-&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;root will contains a working copy of our git repository pointing at the source branch and
-output will contains a working copy of the same repository pointing at the master branch,
-the tricky part here is that these two branches need to be completly separated,
-we wil now see how (there is a guide on github to do this too).&lt;/p&gt;
-
-&lt;h2&gt;Setting up things&lt;/h2&gt;
-
-&lt;p&gt;First we need to initialize the repository, just use your root folder for this
-("$" is the prompt here):&lt;/p&gt;
-
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c"&gt;# initialize the local repository&lt;/span&gt;
-  &lt;span class="nv"&gt;$ &lt;/span&gt;git init
-&lt;span class="c"&gt;# commits your files&lt;/span&gt;
-  &lt;span class="nv"&gt;$ &lt;/span&gt;git add .
-  &lt;span class="nv"&gt;$ &lt;/span&gt;git ci -m &lt;span class="s2"&gt;"init"&lt;/span&gt; 
-&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;Now we have a master branch containing our site's source which is not yet what we
-want, so we will now rename this branch and push it to the remote:&lt;/p&gt;
-
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c"&gt;# rename our master branch&lt;/span&gt;
-  &lt;span class="nv"&gt;$ &lt;/span&gt;git br -m master &lt;span class="nb"&gt;source&lt;/span&gt;
-&lt;span class="c"&gt;# add your github repository as origin&lt;/span&gt;
-  &lt;span class="nv"&gt;$ &lt;/span&gt;git add origin git@github.com:&lt;span class="o"&gt;[&lt;/span&gt;user&lt;span class="o"&gt;]&lt;/span&gt;/&lt;span class="o"&gt;[&lt;/span&gt;user&lt;span class="o"&gt;]&lt;/span&gt;.github.com.git
-&lt;span class="c"&gt;# push to the remote repository and set the master local branch to&lt;/span&gt;
-&lt;span class="c"&gt;# track origin/master&lt;/span&gt;
-  &lt;span class="nv"&gt;$ &lt;/span&gt;git push -u origin master
-&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;We have a repository with only one branch: source, now we can create the master branch.&lt;br&gt;
-remove the output folder if it exists (rm -rf output) and do this:&lt;/p&gt;
-
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c"&gt;# fetch a working copy of your repository&lt;/span&gt;
-  &lt;span class="nv"&gt;$ &lt;/span&gt;git clone git@github.com:&lt;span class="o"&gt;[&lt;/span&gt;user&lt;span class="o"&gt;]&lt;/span&gt;/&lt;span class="o"&gt;[&lt;/span&gt;user&lt;span class="o"&gt;]&lt;/span&gt;.github.com.git output
-  &lt;span class="nv"&gt;$ &lt;/span&gt;&lt;span class="nb"&gt;cd &lt;/span&gt;output
-&lt;span class="c"&gt;# create the isolated branch&lt;/span&gt;
-  &lt;span class="nv"&gt;$ &lt;/span&gt;git symbolic-ref HEAD refs/heads/master
-  &lt;span class="nv"&gt;$ &lt;/span&gt;rm .git/index
-  &lt;span class="nv"&gt;$ &lt;/span&gt;git clean -fdx
-&lt;/pre&gt;&lt;/div&gt;
-
-
-&lt;p&gt;You should now have your master branch ready, just generate your nanoc output
-(nanoc3 co in the root folder) and commit &amp;amp; push your files and your site should
-appears shortly.&lt;/p&gt;
-
-&lt;p&gt;(Actually it took a second commit for me for the site to effectively appears)&lt;/p&gt;
-
-&lt;p&gt;One thing allowing this setup to work is that nanoc do not delete the output folder
-when rebuilding the site, it justs overwrite existing files.&lt;/p&gt;</content>
   </entry>
 </feed>
